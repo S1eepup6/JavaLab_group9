@@ -1,0 +1,4 @@
+color{blue}
+sender{8080}
+receiver{8888}
+filetype{MESSAGE}
