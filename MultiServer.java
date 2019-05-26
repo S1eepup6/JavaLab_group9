@@ -1,94 +1,135 @@
+
 package assignment6;
 
  
 
-import java.io.BufferedReader;
+import java.net.*;
 
-import java.io.DataInputStream;
+import java.io.*;
 
-import java.io.DataOutputStream;
+import java.util.Date;
 
-import java.io.IOException;
-
-import java.io.InputStream;
-
-import java.io.InputStreamReader;
-
-import java.io.OutputStream;
-
-import java.net.ConnectException;
-
-import java.net.InetAddress;
-
-import java.net.Socket;
-
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
 
  
 
-public class TCPClient {
+public class MultiServer {
 
-	public static void main(String args[]) {
+    public static void main(String[] args) {
 
-		try {
+        ServerSocket serverSocket = null;
 
-			String serverIp = "127.0.0.1";
+        try {
 
-			String message;
+			serverSocket = new ServerSocket(7777);
 
-			System.out.println("Requesting to access. Server IP : " + serverIp);
+			System.out.println(getTime() + "Server is ready.");
 
-			Socket socket = new Socket(serverIp, 7777);
+		}
 
-			InputStream in = socket.getInputStream();
+		catch(IOException e) {
 
-			OutputStream out = socket.getOutputStream();
+			e.printStackTrace();
+
+		}
+
+        while(true) {
+
+        	try {
+
+				System.out.println(getTime() + "Waiting for connection.");
+
+                Socket connectedClientSocket = serverSocket.accept();
+
+                InetAddress ia = connectedClientSocket.getInetAddress();
+
+                String ip = ia.getHostAddress(); // 접속된 원격 Client IP 
+
+				System.out.println(getTime() + ip + "Access request");
+
+                ThreadServerHandler handler = new ThreadServerHandler(connectedClientSocket);
+
+                handler.start(); 
+
+            } 
+
+        	catch(IOException e) {
+
+				e.printStackTrace();
+
+			}
+
+        }
+
+    }
+
+    static String getTime() {
+
+		SimpleDateFormat f = new SimpleDateFormat("[hh:mm:ss]");
+
+		return f.format(new Date());
+
+	}
+
+}
+
+ 
+
+class ThreadServerHandler extends Thread {
+
+    private Socket connectedClientSocket;
+
+    String ClientMessage;
+
+    public ThreadServerHandler(Socket connectedClientSocket) {
+
+        this.connectedClientSocket = connectedClientSocket;  
+
+    }
+
+    public void run() {
+
+        try {
+
+            //클라이언트로 내용을 출력 할 객체 생성
+
+            InputStream in = connectedClientSocket.getInputStream();
+
+			OutputStream out = connectedClientSocket.getOutputStream();
 
 			DataInputStream dis = new DataInputStream(in);
 
 			DataOutputStream dos = new DataOutputStream(out);
 
-			
+			ClientMessage = new String(dis.readUTF());
 
-			Scanner input = new Scanner(System.in);
+			dos.writeUTF("[Notice] " + ClientMessage + "from Server.");
 
-			System.out.print("Message to send : ");
-
-			message = input.next();
-
-			
-
-			dos.writeUTF(message);
-
-			
-
-			System.out.println("Message from server : " + dis.readUTF());
-
-			System.out.println("Closing connection...");
-
-			
-
-			dis.close();
+			System.out.println(getTime() + "Data is transmitted.");
 
 			dos.close();
 
-			socket.close();
+			dis.close();
 
-			System.out.println("Connection is closed.");
+        } catch(IOException ignored) {
 
-		} catch (ConnectException ce) {
+        } finally {
 
-			ce.printStackTrace();
+            try {
 
-		} catch (IOException ie) {
+                connectedClientSocket.close();
 
-			ie.printStackTrace();
+            } catch(IOException ignored) {}
 
-		} catch (Exception e) {
+        }
 
-			e.printStackTrace();
+    }
 
-		}
+    static String getTime() {
+
+		SimpleDateFormat f = new SimpleDateFormat("[hh:mm:ss]");
+
+		return f.format(new Date());
 
 	}
 
