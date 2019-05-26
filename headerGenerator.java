@@ -1,17 +1,21 @@
-package proj;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 public class headerGenerator {		//can only make configuration func
+	String message;
 	String configInfo;
-	String fileType;
+	filetype fileType;
 	long sender;
 	long receiver;
-	public headerGenerator(long s, long r, String f, String c)
+	public headerGenerator(long _sender, long _receiver, filetype _fileType, String _configInfo)
 	{
-		fileType = f;
-		configInfo = c;
-		sender = s;
-		receiver = r;
+		fileType = _fileType;
+		configInfo = _configInfo;
+		sender = _sender;
+		receiver = _receiver;
 	}
 
 	public String configProperty()
@@ -37,30 +41,64 @@ public class headerGenerator {		//can only make configuration func
 		return configInfo.substring(configInfo.indexOf(':') + 1).trim();
 	}
 
-	public void makeAsJSON(String property, String arg1, String arg2)
+	public String makeAsJSON(String property, String arg1, String arg2)
 	{
 		String result = property + '{' + arg1 + ',' + arg2 + '}';
 		result.toLowerCase();
-		System.out.println(result);
+		result += '\n';
+		return result;
 	}
 
-	public void makeAsJSON(String property, String arg1)
+	public String makeAsJSON(String property, String arg1)
 	{
 		String result = property + '{' + arg1 + '}';
 		result.toLowerCase();
-		System.out.println(result);
+		result += '\n';
+		return result;
 	}
 
-	public void makeAsJSON(String property, long arg1, long arg2)
+	public String makeAsJSON(String property, long arg1, long arg2)
 	{
 		String result = property + '{' + arg1 + ',' + arg2 + '}';
 		result.toLowerCase();
-		System.out.println(result);
+		result += '\n';
+		return result;
 	}
-	public void makeAsJSON(String property, long arg1)
+	public String makeAsJSON(String property, long arg1)
 	{
 		String result = property + '{' + arg1 + '}';
 		result.toLowerCase();
-		System.out.println(result);
+		result += '\n';
+		return result;
+	}
+	public String makeAsJSON(String property, filetype arg1)
+	{
+		String result = property + '{' + arg1 + '}';
+		result.toLowerCase();
+		result += '\n';
+		return result;
+	}
+
+	public void makeJSONfile()
+	{
+		try
+		{
+			File headerFile = new File("header.txt");
+			FileWriter headerWriter = new FileWriter(headerFile);
+			headerWriter.write(makeAsJSON(configProperty(),configValue()));
+			headerWriter.write(makeAsJSON("sender", sender));
+			headerWriter.write(makeAsJSON("receiver", receiver));
+			headerWriter.write(makeAsJSON("filetype", fileType));
+
+			headerWriter.close();
+		}
+		catch(FileNotFoundException fe)
+		{
+			fe.printStackTrace();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
