@@ -1,4 +1,4 @@
-package proj;
+import java.util.*;
 
 public class stringParser {
 	private String dest;
