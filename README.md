@@ -6,11 +6,13 @@
     
 
 ## 1. File / Message transfer
-    JunSeok Lee will modify
+    JunSeok Lee will modify.
+    Yes of Course....
 
 
 ## 2. User descript
     I believe JunSeok Lee
+    No, you evil.
 
 ## 3. Self-recommendation system
 
