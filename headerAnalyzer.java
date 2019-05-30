@@ -16,6 +16,27 @@ class headerAnalyzer{
         try
         {
             FileReader headReader = new FileReader(header);
+            String headInfo = "";
+            int singleCh = 0;
+            while((singleCh = headReader.read()) != -1){
+                headInfo += (char)singleCh;
+            }       //read header file
+            headReader.close();
+            int braceStart = 0;
+            int braceEnd = 0;
+            String property = "";
+            String content = "";
+            while(headInfo.indexOf('{', braceEnd) != -1)
+            {
+                braceStart = headInfo.indexOf('{',braceEnd);
+                property = headInfo.substring(((braceEnd != 0 ) ? braceEnd + 1 : braceEnd), braceStart).trim();
+
+                braceEnd = headInfo.indexOf('}', braceStart);
+                content = headInfo.substring(braceStart + 1, braceEnd).trim();
+
+                System.out.println(property);
+                System.out.println(content);
+            }
         }
         catch(FileNotFoundException fe)
         {

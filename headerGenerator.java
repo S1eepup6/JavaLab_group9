@@ -81,14 +81,16 @@ public class headerGenerator {		//can only make configuration func
 
 	public void makeJSONfile()
 	{
+		//headerfile order
+		//sender, receiver, fileType, configure(if exists)
 		try
 		{
 			File headerFile = new File("header.txt");
 			FileWriter headerWriter = new FileWriter(headerFile);
-			headerWriter.write(makeAsJSON(configProperty(),configValue()));
 			headerWriter.write(makeAsJSON("sender", sender));
 			headerWriter.write(makeAsJSON("receiver", receiver));
 			headerWriter.write(makeAsJSON("filetype", fileType));
+			headerWriter.write(makeAsJSON(configProperty(),configValue()));
 
 			headerWriter.close();
 		}
