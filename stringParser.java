@@ -1,5 +1,3 @@
-import java.util.*;
-
 public class stringParser {
 	private String dest;
 	public stringParser(String d) { dest = d; }
