@@ -10,7 +10,7 @@
                 "Main"
             ],
             "dependsOn" : "JAVAC"
-        }
+        },
         {
             "label" : "JAVAC",
             "type" : "shell",
@@ -18,7 +18,7 @@
             "args": [
                 "*.java"
             ]
-        }
+        },
         {
             "label": "build",
             "type": "shell",

@@ -1,29 +1,24 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 class messagePrint{
     String ID = null;
     File header = null;
     String msg = null;
     HashMap<String, String> config = new HashMap<String,String>();
+    emotionReady tempER = null;
 
-    public static final String ANSI_RESET = "\033[0m";
-    public static final String ANSI_BLACK = (char)27 + "[30m";
-    public static final String ANSI_RED = "\033[31m";
-    public static final String ANSI_GREEN = (char)27 + "[32m";
-    public static final String ANSI_YELLOW = (char)27 + "[33m";
-    public static final String ANSI_BLUE = (char)27 + "[34m";
-    public static final String ANSI_PURPLE = (char)27 + "[35m";
-    public static final String ANSI_CYAN = (char)27 + "[36m";
-    public static final String ANSI_WHITE = (char)27 + "[37m";
-
-    public messagePrint(String filename, String message, String owner)
+    public messagePrint(String filename, String message, String owner, emotionReady mainER)
     {
         header = new File(filename);
         msg = message;
         ID = owner;
+        tempER = mainER;
     }
 
     private void analyze()
@@ -64,18 +59,40 @@ class messagePrint{
 
     public void printMSG()
     {
-        analyze();
-        if(!ID.equals(config.get("receiver")))
+        File reportFile = new File("record.txt");
+        try
         {
-            return;
-        }
-        System.out.println("Sender : " + config.get("sender"));
+            FileWriter reportFileWriter = new FileWriter(reportFile, true);
+            analyze();
+            if(!ID.equals(config.get("receiver")))
+            {
+                return;
+            }
+            System.out.println("Sender : " + config.get("sender"));
+            reportFileWriter.write("Sender : " + config.get("sender") + "\r\n");
 
-        if(!config.get("filetype").equals("MESSAGE"))
-            System.out.println("FILE sended");
-        else
+            if(!config.get("filetype").equals("MESSAGE"))
+            {
+                System.out.println("FILE sent");
+                reportFileWriter.write("FILE sent"+ "\r\n");
+            }
+            else
+            {
+                System.out.print( msg );
+                reportFileWriter.write( msg + "\r\n");
+                List<Double> emotionInMessage = tempER.analyze(msg);
+                for(Double i : emotionInMessage)
+                {
+                    reportFileWriter.write(i+";");
+                }
+                reportFileWriter.write("\r\n");
+            }
+
+            reportFileWriter.close();
+        }
+        catch(IOException ie)
         {
-            System.out.print( msg );
+            ie.printStackTrace();
         }
     }
 }
