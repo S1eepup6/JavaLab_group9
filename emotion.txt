@@ -1,0 +1,11 @@
+# text file for just testing.
+# test sentence : I was born to luv u with every single beats of my hearts
+# test results with format
+# : 0.000000;-2.000000;0.136100;-2.000000;1.000000;-2.000000;-2.000000;0.000000;-0.200000;0.453423;-2.000000;-2.000000;0.500000;
+luv 1.0
+hearts 0.5
+born 0.1361
+beats 0.453423
+I 0
+every 0
+single -0.2
