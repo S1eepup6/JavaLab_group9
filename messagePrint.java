@@ -1,10 +1,14 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.Stack;
 
 class messagePrint{
     String ID = null;
@@ -12,6 +16,7 @@ class messagePrint{
     String msg = null;
     HashMap<String, String> config = new HashMap<String,String>();
     emotionReady tempER = null;
+    Stack<Double> sentimentStack = new Stack<Double>();
 
     public messagePrint(String filename, String message, String owner, emotionReady mainER)
     {
@@ -19,6 +24,34 @@ class messagePrint{
         msg = message;
         ID = owner;
         tempER = mainER;
+
+        File sentimentFile = new File("sentiment.txt");
+        try
+        {
+            BufferedReader sentimentFileReader = new BufferedReader(new FileReader(sentimentFile));
+            do
+            {
+                String temp;
+                try
+                {
+                    temp = sentimentFileReader.readLine();
+                    sentimentStack.push(Double.parseDouble(temp));
+                }
+                catch(NullPointerException ne)
+                {
+                    break;
+                }
+            }while(true);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        for(double i : sentimentStack)
+        {
+            System.out.printf("%f  ", i);
+        }
     }
 
     private void analyze()
@@ -57,7 +90,12 @@ class messagePrint{
         }
     }
 
-    public void printMSG()
+    public void getNewMessage(String newMessage)
+    {
+        msg =newMessage;
+    }
+
+    public void printMessage()
     {
         File reportFile = new File("record.txt");
         try
@@ -78,14 +116,30 @@ class messagePrint{
             }
             else
             {
-                System.out.print( msg );
-                reportFileWriter.write( msg + "\r\n");
+                double recommendedBase = 0.0;
+                double weight = -0.70;
+                for(int i = 1 ; i <= ((sentimentStack.size() < 10) ? sentimentStack.size() : 10); i++)
+                {
+                    recommendedBase += weight * sentimentStack.elementAt(sentimentStack.size() - i);
+                    weight += 0.07;
+                }
+                System.out.println("recommended base : " + recommendedBase);
+
+                double sentiment = 0.0;
                 List<Double> emotionInMessage = tempER.analyze(msg);
                 for(Double i : emotionInMessage)
                 {
-                    reportFileWriter.write(i+";");
+                    if(!(i < -1.0 || i > 1.0))
+                        sentiment += i;
                 }
-                reportFileWriter.write("\r\n");
+                FileWriter sentimentFileWriter = new FileWriter(new File("sentiment.txt"), true);
+                sentimentFileWriter.write(sentiment + "\r\n");
+                sentimentStack.push(sentiment);
+
+                System.out.print( msg + "\r\n");
+
+                sentimentFileWriter.close();
+                reportFileWriter.write( msg + "\r\n");
             }
 
             reportFileWriter.close();
