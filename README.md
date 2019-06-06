@@ -15,7 +15,9 @@
     No, you evil.
 
 ## 3. Self-recommendation system
-
+    Based on WordNet-Domain's WN Affect dataset.
+    http://wndomains.fbk.eu/index.html
+    Dataset is preprocessed before implementation.
 
 ## 4. Exension in chat-room
 >2019.05.26
