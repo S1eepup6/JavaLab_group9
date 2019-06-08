@@ -17,6 +17,14 @@ public class headerGenerator {		//can only make configuration func
 		receiver = _receiver;
 	}
 
+	public void refresh(long _sender, long _receiver, filetype _fileType, String _configInfo)
+	{
+		fileType = _fileType;
+		configInfo = _configInfo;
+		sender = _sender;
+		receiver = _receiver;
+	}
+
 	public String configProperty()
 	{
 		String errmsg = "Error";

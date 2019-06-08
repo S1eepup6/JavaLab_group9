@@ -1,6 +1,7 @@
 public class stringParser {
 	private String dest;
 	public stringParser(String d) { dest = d; }
+	public void getString(String d)	{ dest = d; }
 	public String pureString()		//return only pure string, not with configure information
 	{
 		int pureStart = dest.indexOf('>');
