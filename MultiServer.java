@@ -1,137 +1,570 @@
-
-package assignment6;
-
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
  
-
-import java.net.*;
-
-import java.io.*;
-
-import java.util.Date;
-
-import java.text.SimpleDateFormat;
-
- 
-
+/*ÄÜ¼Ö ¸ÖÆ¼Ã¤ÆÃ ¼­¹ö ÇÁ·Î±×·¥*/
 public class MultiServer {
-
-    public static void main(String[] args) {
-
-        ServerSocket serverSocket = null;
-
-        try {
-
-			serverSocket = new ServerSocket(7777);
-
-			System.out.println(getTime() + "Server is ready.");
-
-		}
-
-		catch(IOException e) {
-
-			e.printStackTrace();
-
-		}
-
-        while(true) {
-
-        	try {
-
-				System.out.println(getTime() + "Waiting for connection.");
-
-                Socket connectedClientSocket = serverSocket.accept();
-
-                InetAddress ia = connectedClientSocket.getInetAddress();
-
-                String ip = ia.getHostAddress(); // ì ‘ì†ëœ ì›ê²© Client IP 
-
-				System.out.println(getTime() + ip + "Access request");
-
-                ThreadServerHandler handler = new ThreadServerHandler(connectedClientSocket);
-
-                handler.start(); 
-
-            } 
-
-        	catch(IOException e) {
-
-				e.printStackTrace();
-
-			}
-
+    HashMap<String,HashMap<String,ServerRecThread>> globalMap; //Áö¿ªº° ÇØ½¬¸ÊÀ» °ü¸®ÇÏ´Â ÇØ½Ã¸Ê
+    ServerSocket serverSocket = null;
+    Socket socket = null;
+    static int connUserCount = 0; //¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú Ä«¿îÆ®
+    //»ı¼ºÀÚ
+    public MultiServer(){
+       globalMap = new HashMap<String,HashMap<String, ServerRecThread>>();
+       
+        //clientMap = new HashMap<String,DataOutputStream>(); //Å¬¶óÀÌ¾ğÆ®ÀÇ Ãâ·Â½ºÆ®¸²À» ÀúÀåÇÒ ÇØ½¬¸Ê »ı¼º.
+        Collections.synchronizedMap(globalMap); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group01 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group01); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group02 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group02); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group03 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group03); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group04 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group04); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group05 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group05); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group06 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group06); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        HashMap<String,ServerRecThread> group07 = new HashMap<String,ServerRecThread>();
+        Collections.synchronizedMap(group07); //ÇØ½¬¸Ê µ¿±âÈ­ ¼³Á¤.
+        
+        globalMap.put("À±Èñ¿ë1",group01);
+        globalMap.put("À±Èñ¿ë2",group02);
+        globalMap.put("À±Èñ¿ë3",group03);
+        globalMap.put("À±Èñ¿ë4",group04);
+        globalMap.put("À±Èñ¿ë5",group05);
+        globalMap.put("À±Èñ¿ë6",group06);
+        globalMap.put("À±Èñ¿ë7",group07);
+    }//»ı¼ºÀÚ----
+    public void init(){
+        try{
+            serverSocket = new ServerSocket(9999); //9999Æ÷Æ®·Î ¼­¹ö¼ÒÄÏ °´Ã¼»ı¼º.
+            System.out.println("##¼­¹ö°¡ ½ÃÀÛµÇ¾ú½À´Ï´Ù.");
+            while(true){ //¼­¹ö°¡ ½ÇÇàµÇ´Â µ¿¾È Å¬¶óÀÌ¾ğÆ®µéÀÇ Á¢¼ÓÀ» ±â´Ù¸².
+                socket = serverSocket.accept(); //Å¬¶óÀÌ¾ğÆ®ÀÇ Á¢¼ÓÀ» ±â´Ù¸®´Ù°¡ Á¢¼ÓÀÌ µÇ¸é Socket°´Ã¼¸¦ »ı¼º.
+                System.out.println(socket.getInetAddress()+":"+socket.getPort()); //Å¬¶óÀÌ¾ğÆ® Á¤º¸ (ip, Æ÷Æ®) Ãâ·Â
+                Thread msr = new ServerRecThread(socket); //¾²·¹µå »ı¼º.
+                msr.start(); //¾²·¹µå ½Ãµ¿.
+            }      
+           
+        }catch(Exception e){
+            e.printStackTrace();
         }
-
     }
-
-    static String getTime() {
-
-		SimpleDateFormat f = new SimpleDateFormat("[hh:mm:ss]");
-
-		return f.format(new Date());
-
-	}
-
-}
-
- 
-
-class ThreadServerHandler extends Thread {
-
-    private Socket connectedClientSocket;
-
-    String ClientMessage;
-
-    public ThreadServerHandler(Socket connectedClientSocket) {
-
-        this.connectedClientSocket = connectedClientSocket;  
-
-    }
-
-    public void run() {
-
-        try {
-
-            //í´ë¼ì´ì–¸íŠ¸ë¡œ ë‚´ìš©ì„ ì¶œë ¥ í•  ê°ì²´ ìƒì„±
-
-            InputStream in = connectedClientSocket.getInputStream();
-
-			OutputStream out = connectedClientSocket.getOutputStream();
-
-			DataInputStream dis = new DataInputStream(in);
-
-			DataOutputStream dos = new DataOutputStream(out);
-
-			ClientMessage = new String(dis.readUTF());
-
-			dos.writeUTF("[Notice] " + ClientMessage + "from Server.");
-
-			System.out.println(getTime() + "Data is transmitted.");
-
-			dos.close();
-
-			dis.close();
-
-        } catch(IOException ignored) {
-
-        } finally {
-
+    /** Á¢¼ÓµÈ ¸ğµç Å¬¶óÀÌ¾ğÆ®µé¿¡°Ô ¸Ş½ÃÁö¸¦ Àü´Ş. */
+    public void sendAllMsg(String msg){
+        Iterator global_it = globalMap.keySet().iterator();
+        while(global_it.hasNext()){
+            try{
+                HashMap<String, ServerRecThread> it_hash = globalMap.get(global_it.next());
+                Iterator it = it_hash.keySet().iterator();
+                while(it.hasNext()){
+                    ServerRecThread st = it_hash.get(it.next());
+                    st.out.writeUTF(msg);
+                }              
+            }catch(Exception e){
+                System.out.println("¿¹¿Ü:"+e);
+            }
+        }
+    }//sendAllMsg()-----------
+   
+   
+    /**ÇØ´ç Å¬¶óÀÌ¾ğÆ®°¡ ¼ÓÇØÀÖ´Â ±×·ì¿¡´ëÇØ¼­¸¸ ¸Ş½ÃÁö Àü´Ş.*/
+    public void sendGroupMsg(String loc,String msg){      
+       
+        HashMap<String, ServerRecThread> gMap = globalMap.get(loc);    
+        Iterator<String> group_it = globalMap.get(loc).keySet().iterator();        
+        while(group_it.hasNext()){
+            try{    
+                    ServerRecThread st = gMap.get(group_it.next());
+                    if(!st.chatMode){ //1:1´ëÈ­¸ğµå°¡ ¾Æ´Ñ »ç¶÷¿¡°Ô¸¸.
+                        st.out.writeUTF(msg);  
+                    }
+            }catch(Exception e){
+                System.out.println("¿¹¿Ü:"+e);
+            }
+        }  
+    }//sendGroupMsg()-----------
+   
+   
+    /**1:1 ´ëÈ­*/
+    public void sendPvPMsg(String loc,String fromName, String toName, String msg){
+     
             try {
-
-                connectedClientSocket.close();
-
-            } catch(IOException ignored) {}
-
+                globalMap.get(loc).get(toName).out.writeUTF(msg);
+                globalMap.get(loc).get(fromName).out.writeUTF(msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+         
+    }//sendPvPMsg()-----------
+   
+    /** ±Ó¼Ó¸» */
+    public void sendToMsg(String loc, String fromName, String toName, String msg){     
+         
+        try{   
+           
+           
+                globalMap.get(loc).get(toName).out.writeUTF("whisper|"+fromName+"|"+msg);
+                globalMap.get(loc).get(fromName).out.writeUTF("whisper|"+fromName+"|"+msg);
+               
+           }catch(Exception e){
+                System.out.println("¿¹¿Ü:"+e);
+           }
+         
+     }//sendAllMsg()-----------
+   
+   
+    /**°¢±×·ìÀÇ Á¢¼ÓÀÚ¼ö¿Í ¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú¸¦ ¹İÈ¯
+     * ÇÏ´Â ¸Ş¼Òµå**/
+    public String getEachMapSize(){
+        return getEachMapSize(null);    
+    }//getEachMapSize()-----------
+   
+    /**°¢±×·ìÀÇ Á¢¼ÓÀÚ¼ö¿Í ¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú¸¦ ¹İÈ¯ ÇÏ´Â ¸Ş¼Òµå
+     * Ãß°¡ Áö¿ªÀ» Àü´Ş¹ŞÀ¸¸é ÇØ´ç Áö¿ªÀ» Ã¼Å©
+     * */
+    public String getEachMapSize(String loc){
+       
+        Iterator global_it = globalMap.keySet().iterator();
+        StringBuffer sb = new StringBuffer();
+        int sum=0;
+        sb.append("=== ±×·ì ¸ñ·Ï ==="+System.getProperty("line.separator"));
+        while(global_it.hasNext()){
+            try{
+                String key = (String) global_it.next();
+               
+                HashMap<String, ServerRecThread> it_hash = globalMap.get(key);
+                //if(key.equals(loc)) key+="(*)"; //ÇöÀç À¯Àú°¡ Á¢¼ÓµÈ °÷ Ç¥½Ã
+                int size = it_hash.size();
+                sum +=size;
+                sb.append(key+": ("+size+"¸í)"+(key.equals(loc)?"(*)":"")+"\r\n");
+               
+            }catch(Exception e){
+                System.out.println("¿¹¿Ü:"+e);
+            }
         }
-
+        //sb.append("¢ÁÇöÀç ´ëÈ­¿¡ Âü¿©ÇÏ°íÀÖ´Â À¯Àú¼ö :"+ MultiServer.connUserCount);
+        sb.append("¢ÁÇöÀç ´ëÈ­¿¡ Âü¿©ÇÏ°íÀÖ´Â À¯Àú¼ö :"+ sum+ "¸í \r\n");
+        //System.out.println(sb.toString());
+        return sb.toString();
+    }//getEachMapSize()-----------
+   
+   
+    /**Á¢¼ÓµÈ À¯Àú Áßº¹Ã¼Å©*/        
+public boolean isNameGlobla(String name){
+        boolean result=false;
+        Iterator<String> global_it = globalMap.keySet().iterator();
+        while(global_it.hasNext()){
+            try{
+                String key = global_it.next();             
+                HashMap<String, ServerRecThread> it_hash = globalMap.get(key);
+                if(it_hash.containsKey(name)){
+                    result= true; //Áßº¹µÈ ¾ÆÀÌµğ°¡ Á¸Àç.
+                    break;
+                }
+               
+            }catch(Exception e){
+                System.out.println("isNameGlobla()¿¹¿Ü:"+e);
+            }
+        }
+     
+        return result;
+    }//isNameGlobla()-----------
+ 
+   
+    /**¹®ÀÚ¿­ null °ª ¹× "" Àº ´ëÃ¼ ¹®ÀÚ¿­·Î »ğÀÔ°¡´É.*/
+    public String nVL(String str, String replace){
+        String output="";
+        if(str==null || str.trim().equals("")){
+            output = replace;      
+        }else{
+            output = str;
+        }
+        return output;     
     }
-
-    static String getTime() {
-
-		SimpleDateFormat f = new SimpleDateFormat("[hh:mm:ss]");
-
-		return f.format(new Date());
-
-	}
-
+   
+   
+   
+    //main¸Ş¼­µå
+    public static void main(String[] args) {
+        MultiServer ms = new MultiServer(); //¼­¹ö°´Ã¼ »ı¼º.
+        ms.init();//½ÇÇà.
+    }//main()------  
+   
+   
+   
+    ////////////////////////////////////////////////////////////////////////
+    //----// ³»ºÎ Å¬·¡½º //--------//
+   
+    // Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ÀĞ¾î¿Â ¸Ş½ÃÁö¸¦ ´Ù¸¥ Å¬¶óÀÌ¾ğÆ®(socket)¿¡ º¸³»´Â ¿ªÇÒÀ» ÇÏ´Â ¸Ş¼­µå
+    class ServerRecThread extends Thread {
+       
+        Socket socket;
+        DataInputStream in;
+        DataOutputStream out;
+        String name=""; //ÀÌ¸§ ÀúÀå
+        String loc="";  //Áö¿ª ÀúÀå
+        String toNameTmp = null;//1:1´ëÈ­ »ó´ë  
+        String fileServerIP; //ÆÄÀÏ¼­¹ö ¾ÆÀÌÇÇ ÀúÀå
+        String filePath; //ÆÄÀÏ ¼­¹ö¿¡¼­ Àü¼ÛÇÒ ÆÄÀÏ ÆĞ½º ÀúÀå.
+        boolean chatMode; //1:1´ëÈ­¸ğµå ¿©ºÎ
+       
+       
+        //»ı¼ºÀÚ.
+        public ServerRecThread(Socket socket){
+            this.socket = socket;
+            try{
+                //SocketÀ¸·ÎºÎÅÍ ÀÔ·Â½ºÆ®¸²À» ¾ò´Â´Ù.
+                in = new DataInputStream(socket.getInputStream());
+                //SocketÀ¸·ÎºÎÅÍ Ãâ·Â½ºÆ®¸²À» ¾ò´Â´Ù.
+                out = new DataOutputStream(socket.getOutputStream());
+            }catch(Exception e){
+                System.out.println("ServerRecThread »ı¼ºÀÚ ¿¹¿Ü:"+e);
+            }
+        }//»ı¼ºÀÚ ------------
+       
+       
+       
+        /**Á¢¼ÓµÈ À¯Àú¸®½ºÆ®  ¹®ÀÚ¿­·Î ¹İÈ¯*/        
+        public String showUserList(){
+           
+            StringBuilder output = new StringBuilder("==Á¢¼ÓÀÚ¸ñ·Ï==\r\n");
+            Iterator it = globalMap.get(loc).keySet().iterator(); //ÇØ½¬¸Ê¿¡ µî·ÏµÈ »ç¿ëÀÚÀÌ¸§À» °¡Á®¿È.
+            while(it.hasNext()){ //¹İº¹ÇÏ¸é¼­ »ç¿ëÀÚÀÌ¸§À» StringBuilder¿¡ Ãß°¡
+                 try{
+                    String key= (String) it.next();                                    
+                    //out.writeUTF(output);
+                    if(key.equals(name)){ //ÇöÀç»ç¿ëÀÚ Ã¼Å©
+                        key += " (*) ";
+                    }    
+                   
+                    output.append(key+"\r\n");                  
+                 }catch(Exception e){
+                     System.out.println("¿¹¿Ü:"+e);
+                 }
+             }//while---------
+            output.append("=="+ globalMap.get(loc).size()+"¸í Á¢¼ÓÁß==\r\n");
+            System.out.println(output.toString());
+            return output.toString();
+         }//showUserList()-----------
+       
+       
+       /**¸Ş½ÃÁö ÆÄ¼­ */    
+       public String[] getMsgParse(String msg){
+            System.out.println("msgParse():msg?   "+ msg);         
+            String[] tmpArr = msg.split("[|]");        
+            return tmpArr;
+        }
+       
+       
+        @Override
+        public void run(){ //¾²·¹µå¸¦ »ç¿ëÇÏ±â À§ÇØ¼­ run()¸Ş¼­µå ÀçÁ¤ÀÇ
+            HashMap<String, ServerRecThread> clientMap=null;   //ÇöÀç Å¬¶óÀÌ¾ğÆ®°¡ ÀúÀåµÇ¾îÀÖ´Â ÇØ½¬¸Ê        
+           
+            try{  
+                while(in!=null){ //ÀÔ·Â½ºÆ®¸²ÀÌ nullÀÌ ¾Æ´Ï¸é ¹İº¹.
+                    String msg = in.readUTF(); //ÀÔ·Â½ºÆ®¸²À» ÅëÇØ ÀĞ¾î¿Â ¹®ÀÚ¿­À» msg¿¡ ÇÒ´ç.                   
+                    String[] msgArr = getMsgParse(msg.substring(msg.indexOf("|")+1));
+                   
+                    //¸Ş¼¼Áö Ã³¸® ----------------------------------------------
+                    if(msg.startsWith("req_logon")){ //·Î±×¿Â ½Ãµµ (´ëÈ­¸í)                    
+                        //req_logon|´ëÈ­¸í
+                                               
+                        if(!(msgArr[0].trim().equals(""))&&!isNameGlobla(msgArr[0])){                      
+                            name = msgArr[0]; //³Ñ¾î¿Â ´ëÈ­¸íÀº Àü¿ªº¯¼ö name¿¡ ÀúÀå
+                            MultiServer.connUserCount++; //Á¢¼ÓÀÚ¼ö Áõ°¡. (½ºÅÃÆ½º¯¼ö¸¦ »ç¿ëÇÏ±â¿¡ ¾î¿ï·Á¼­ ÇÑ¹ø »ç¿ëÇØº½.)
+                            out.writeUTF("logon#yes|"+getEachMapSize()); //Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ®¿¡°Ô ±×·ì¸ñ·Ï Á¦°ø
+                        }else{
+                             out.writeUTF("logon#no|err01");
+                        }
+                       
+                    }else if(msg.startsWith("req_enterRoom")){ //±×·ìÀÔÀåÀ» ½Ãµµ
+                       
+                        //req_enterRoom|´ëÈ­¸í|Áö¿ª
+                         loc = msgArr[1]; //¸Ş½ÃÁö¿¡¼­ Áö¿ªºÎºĞ¸¸ ÃßÃâÇÏ¿© Àü¿ªº¯¼ö¿¡ ÀúÀå
+                         
+                         if(isNameGlobla(msgArr[0])){
+                             out.writeUTF("logon#no|"+name);  
+                             
+                         }else if(globalMap.containsKey(loc)){
+                             sendGroupMsg(loc, "show|[##] "+name + "´ÔÀÌ ÀÔÀåÇÏ¼Ì½À´Ï´Ù.");
+                             clientMap= globalMap.get(loc); //ÇöÀç±×·ìÀÇ ÇØ½¬¸ÊÀ» µû·Î ÀúÀå.
+                             clientMap.put(name, this); //ÇöÀç MultiServerRecÀÎ½ºÅÏ½º¸¦ Å¬¶óÀÌ¾ğÆ®¸Ê¿¡ ÀúÀå.
+                             System.out.println(getEachMapSize()); //¼­¹ö¿¡ ±×·ì¸®½ºÆ® Ãâ·Â.                       
+                             out.writeUTF("enterRoom#yes|"+loc); //Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ®¿¡°Ô ±×·ì¸ñ·Ï Á¦°ø
+                             
+                         }else{                        
+                             out.writeUTF("enterRoom#no|"+loc);                              
+                         }
+                       
+                         
+                       
+                         
+                         
+                    }else if(msg.startsWith("req_cmdMsg")){ //¸í·É¾î Àü¼Û
+                        //req_cmdMsg|´ëÈ­¸í|/Á¢¼ÓÀÚ
+                        if(msgArr[1].trim().equals("/Á¢¼ÓÀÚ")){
+                            out.writeUTF("show|"+showUserList()); //Á¢¼ÓÀÚ Ãâ·Â  
+                       
+                           
+                        }else if(msgArr[1].trim().startsWith("/±Ó¼Ó¸»")){
+                            //req_cmdMsg|´ëÈ­¸í|/±Ó¼Ó¸» »ó´ë¹æ´ëÈ­¸í ´ëÈ­³»¿ë
+                            String[] msgSubArr = msgArr[1].split(" ",3); //¹Ş¾Æ¿Â msgÀ» " "(°ø¹é)À» ±âÁØÀ¸·Î 3°³¸¦ ºĞ¸®
+                            //System.out.println("msgSubArr:"+Arrays.toString(msgSubArr)+"/"+name+"/"+loc);
+                           
+                            if(msgSubArr==null||msgSubArr.length<3){
+                                out.writeUTF("show|[##] ±Ó¼Ó¸» »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n usage : /±Ó¼Ó¸» [»ó´ë¹æÀÌ¸§] [º¸³¾¸Ş½ÃÁö].");
+                            }else if(name.equals(msgSubArr[1])){
+                                out.writeUTF("show|[##] ÀÚ½Å¿¡°Ô ±Ó¼Ó¸»À» ÇÒ¼ö¾ø½À´Ï´Ù.\r\n usage : /±Ó¼Ó¸» [»ó´ë¹æÀÌ¸§] [º¸³¾¸Ş½ÃÁö].");
+                            }else{
+                                String toName = msgSubArr[1];
+                                //String toMsg = "±Ó:from("+name+")=>"+((msgArr[2]!=null)?msgArr[2]:"");
+                                String toMsg = msgSubArr[2];
+                                if(clientMap.containsKey(toName)){ //À¯ÀúÃ¼Å©
+                                    System.out.println("±Ó¼Ó¸»!");
+                                    sendToMsg(loc,name,toName,toMsg);
+                                   
+                                }else{
+                                    out.writeUTF("show|[##] ÇØ´ç À¯Àú°¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+                                }
+                               
+                            }//if
+                           
+                           
+                        }else if(msgArr[1].trim().startsWith("/Áö¿ª")){                          
+                           
+                            String[] msgSubArr = msg.split(" ");                           
+                            if(msgSubArr.length==1){ // º¯°æÇÒ Áö¿ªÀ» ÀÔ·Â¾ÈÇÏ°í /Áö¿ª¸¸ÀÔ·ÂÇßÀ»°æ¿ì Áö¿ª¸ñ·Ï Ãâ·Â                               
+                                out.writeUTF("show|"+getEachMapSize(loc));                             
+                            }else if(msgSubArr.length==2) {
+                                String tmpLoc = msgSubArr[1]; //Áö¿ª
+                               
+                                if(loc.equals(tmpLoc)){
+                                    out.writeUTF("show|[##] ¸í·É¾î »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n º»ÀÎÀÌ Âü¿©ÇÏ°í ÀÖ´Â Áö¿ªÀ» ÁöÁ¤ÇÏ½Ç¼ö¾ø½À´Ï´Ù.\r\n " +
+                                                "usage : Áö¿ª¸ñ·Ï º¸±â : /Áö¿ª" +
+                                                "\r\n usage : Áö¿ªº¯°æ ÇÏ±â : /Áö¿ª [º¯°æÇÒÁö¿ªÀÌ¸§].");
+                                    continue;
+                                }
+                               
+                                if(globalMap.containsKey(tmpLoc)&& !this.chatMode){ //Áö¿ªÃ¼Å©
+                                        out.writeUTF("show|[##] Áö¿ªÀ» "+loc+"¿¡¼­ "+ tmpLoc+"·Î º¯°æÇÕ´Ï´Ù. ");                        
+                                   
+                                        clientMap.remove(name); //ÇöÀç Áö¿ª ÇØ½¬¸Ê¿¡¼­ ÇØ´ç ¾²·¹µå¸¦ Á¦°Å.
+                                        sendGroupMsg(loc, "show|[##] "+name+"´ÔÀÌ ÅğÀåÇÏ¼Ì½À´Ï´Ù.");
+                                       
+                                        System.out.println("ÀÌÀüÁö¿ª("+loc+")¿¡¼­ ¿¡¼­ "+name +"Á¦°Å");
+                                        loc = tmpLoc;
+                                        clientMap = globalMap.get(loc);
+                                        sendGroupMsg(loc, "show|[##] "+name+"´ÔÀÌ ÀÔÀåÇÏ¼Ì½À´Ï´Ù.");
+                                        clientMap.put(name, this); //»õ·Îº¯°æµÈ Áö¿ª¿¡ ¼­¹ö¾²·¹µå ÀúÀå. 
+                               
+                                }else{
+                                    out.writeUTF("##ÀÔ·ÂÇÑ Áö¿ªÀÌ Á¸ÀçÇÏÁö ¾Ê°Å³ª ÇöÀç ÀÌµ¿ÇÒ¼ö¾ø´Â »óÅÂÀÔ´Ï´Ù.");
+                                }//if-----
+                               
+                            }else{
+                                out.writeUTF("show|[##] ¸í·É¾î »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n " +
+                                        "usage : Áö¿ª¸ñ·Ï º¸±â : /Áö¿ª" +
+                                        "\r\n usage : Áö¿ªº¯°æ ÇÏ±â : /Áö¿ª [º¯°æÇÒÁö¿ªÀÌ¸§].");
+                               
+                            }//if---------
+                           
+                           
+                        }else if(msgArr[1].trim().startsWith("/´ëÈ­½ÅÃ»")){
+                            String[] msgSubArr =  msgArr[1].split(" ",2);
+                                               
+                           
+                            if(msgSubArr.length!=2){
+                                out.writeUTF("show|[##] ¸í·É¾î »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n " +
+                                        "usage : 1:1´ëÈ­½ÅÃ»ÇÏ±â : /´ëÈ­½ÅÃ» [»ó´ë¹æ´ëÈ­¸í]");
+                                continue;
+                            }else if(name.equals(msgSubArr[1])){
+                                    out.writeUTF("show|[##] ¸í·É¾î »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n º»ÀÎÀÇ ´ëÈ­¸íÀ» ÁöÁ¤ÇÏ½Ç¼ö¾ø½À´Ï´Ù.1:1´ëÈ­¸¦ ÇÒ »ó´ë¹æÀÇ ´ëÈ­¸íÀ» ÁöÁ¤ÇØÁÖ¼¼¿ä.\r\n " +
+                                            "usage : 1:1´ëÈ­½ÅÃ»ÇÏ±â : /´ëÈ­½ÅÃ» [»ó´ë¹æ´ëÈ­¸í]");
+                                continue;
+                            }
+                           
+                            if(!chatMode){
+                               
+                                String toName = msgSubArr[1].trim();
+                                out.writeUTF("show|[##] "+toName +"´Ô²² ´ëÈ­½ÅÃ»À» ÇÕ´Ï´Ù. ");
+                                if(clientMap.containsKey(toName) && !clientMap.get(toName).chatMode){ //À¯ÀúÃ¼Å©
+                                    //req_PvPchat|½ÅÃ»ÀÚ|ÀÀ´äÀÚ|¸Ş½ÃÁö .... Ãë¼Ò
+                                    //req_PvPchat|¸Ş½ÃÁö .... ·Î º¯°æ
+                                   
+                                    clientMap.get(toName).out.writeUTF("req_PvPchat|[##] "+name+"´Ô²²¼­ 1:1´ëÈ­½ÅÃ»À» ¿äÃ»ÇÏ¿´½À´Ï´Ù\r\n ¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?(y,n)");  
+                                    toNameTmp = toName;
+                                    clientMap.get(toNameTmp).toNameTmp = name;
+                                }else{
+                                    out.writeUTF("show|[##] ÇØ´ç À¯Àú°¡ Á¸ÀçÇÏÁö¾Ê°Å³ª »ó´ë¹æÀÌ 1:1´ëÈ­¸¦ ÇÒ¼ö¾ø´Â »óÅÂÀÔ´Ï´Ù.");
+                                }
+                               
+                            }else{
+                                out.writeUTF("show|[##] 1:1´ëÈ­ ¸ğµåÀÌ¹Ç·Î ´ëÈ­½ÅÃ»À» ÇÏ½Ç¼ö¾ø½À´Ï´Ù.");
+                            }
+                           
+                        }else if(msgArr[1].startsWith("/´ëÈ­Á¾·á")){
+                             
+                            if(chatMode){
+                                chatMode = false; //1:1´ëÈ­¸ğµå ÇØÁ¦
+                                out.writeUTF("show|[##] "+toNameTmp+"´Ô°ú 1:1´ëÈ­¸¦ Á¾·áÇÕ´Ï´Ù.");
+                                clientMap.get(toNameTmp).chatMode=false; //»ó´ë¹æµµ 1:1´ëÈ­¸ğµå ÇØÁ¦
+                                clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name +"´Ô²²¼­ 1:1´ëÈ­¸¦ Á¾·áÇÏ¿´½À´Ï´Ù");
+                                toNameTmp="";
+                                clientMap.get(toNameTmp).toNameTmp="";
+                               
+                            }else{
+                                out.writeUTF("show|[##] 1:1´ëÈ­ÁßÀÏ¶§¸¸ »ç¿ëÇÒ¼öÀÖ´Â ¸í·É¾îÀÔ´Ï´Ù. ");
+                            }
+                           
+                        }else if(msgArr[1].trim().startsWith("/ÆÄÀÏÀü¼Û")){  
+                           
+                            if(!chatMode){
+                                out.writeUTF("show|[##] 1:1´ëÈ­ÁßÀÏ¶§¸¸ »ç¿ëÇÒ¼öÀÖ´Â ¸í·É¾îÀÔ´Ï´Ù. ");
+                                continue;                              
+                            }
+                           
+                            String[] msgSubArr = msgArr[1].split(" ",2);
+                            if(msgSubArr.length!=2){
+                                out.writeUTF("show|[##] ÆÄÀÏÀü¼Û ¸í·É¾î »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n usage : /ÆÄÀÏÀü¼Û [Àü¼ÛÇÒÆÄÀÏ°æ·Î]");
+                                continue;                              
+                            }
+                            filePath = msgSubArr[1];                           
+                            File sendFile = new File(filePath);
+                            String availExtList = "txt,java,jpeg,jpg,png,gif,bmp";
+                           
+                           
+                            if(sendFile.isFile()){                     
+                                String fileExt = filePath.substring(filePath.lastIndexOf(".")+1);
+                                if(availExtList.contains(fileExt)){
+                                    Socket s = globalMap.get(loc).get(toNameTmp).socket;
+                                    //ÆÄÀÏ¼­¹ö¿ªÇÒÀ» ÇÏ´Â Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌÇÇ ÁÖ¼Ò ¾Ë±âÀ§ÇØ ¼ÒÄÏ °´Ã¼ ¾ò¾î¿È.
+                                   
+                                    //System.out.println("s.getLocalSocketAddress()=>"+s.getLocalSocketAddress());
+                                    //System.out.println("s.getLocalAddress()=>"+s.getLocalAddress());
+                                    System.out.println("s.getInetAddress():ÆÄÀÏ¼­¹ö¾ÆÀÌÇÇ=>"+s.getInetAddress());
+                                    //ÆÄÀÏ¼­¹ö¿ªÇÒÀ» ÇÏ´Â Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌÇÇ Ãâ·Â
+                                   
+                                    fileServerIP = s.getInetAddress().getHostAddress();
+                                    clientMap.get(toNameTmp).out.writeUTF("req_fileSend|[##] "+name +"´Ô²²¼­ ÆÄÀÏ["+sendFile.getName()+"] Àü¼ÛÀ» ½ÃµµÇÕ´Ï´Ù. \r\n¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?(Y/N)");                        
+                                    out.writeUTF("show|[##] "+toNameTmp +"´Ô²² ÆÄÀÏ["+sendFile.getAbsolutePath()+"] Àü¼ÛÀ» ½ÃµµÇÕ´Ï´Ù.");
+                                   
+                                }else{
+                                   
+                                    out.writeUTF("show|[##] Àü¼Û°¡´ÉÇÑ ÆÄÀÏÀÌ ¾Æ´Õ´Ï´Ù. \r\n["+availExtList+"] È®ÀåÀÚ¸¦ °¡Áø ÆÄÀÏ¸¸ Àü¼Û°¡´ÉÇÕ´Ï´Ù.");                             
+                                } //if                         
+                           
+                            }else{                             
+                                out.writeUTF("show|[##] Á¸ÀçÇÏÁö ¾Ê´Â ÆÄÀÏÀÔ´Ï´Ù.");                            
+                            } //if
+                        }else{
+                            out.writeUTF("show|[##] Àß¸øµÈ ¸í·É¾îÀÔ´Ï´Ù.");
+                        }//if
+                       
+                    }else if(msg.startsWith("req_say")){ //´ëÈ­³»¿ë Àü¼Û
+                          if(!chatMode){
+                            //req_say|¾ÆÀÌµğ|´ëÈ­³»¿ë
+                            sendGroupMsg(loc, "say|"+name+"|"+msgArr[1]);
+                            //Ãâ·Â½ºÆ®¸²À¸·Î º¸³½´Ù.
+                          }else{
+                            sendPvPMsg(loc, name,toNameTmp , "say|"+name+"|"+msgArr[1]);
+                          }
+                    }else if(msg.startsWith("req_whisper")){ //±Ó¼Ó¸» Àü¼Û
+                        if(msgArr[1].trim().startsWith("/±Ó¼Ó¸»")){
+                            //req_cmdMsg|´ëÈ­¸í|/±Ó¼Ó¸» »ó´ë¹æ´ëÈ­¸í ´ëÈ­³»¿ë
+                            String[] msgSubArr = msgArr[1].split(" ",3); //¹Ş¾Æ¿Â msgÀ» " "(°ø¹é)À» ±âÁØÀ¸·Î 3°³¸¦ ºĞ¸®
+                                                           
+                            if(msgSubArr==null||msgSubArr.length<3){
+                                out.writeUTF("show|[##] ±Ó¼Ó¸» »ç¿ë¹ıÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\r\n usage : /±Ó¼Ó¸» [»ó´ë¹æÀÌ¸§] [º¸³¾¸Ş½ÃÁö].");
+                            }else{
+                                String toName = msgSubArr[1];
+                                //String toMsg = "±Ó:from("+name+")=>"+((msgArr[2]!=null)?msgArr[2]:"");
+                                String toMsg = msgSubArr[2];
+                                if(clientMap.containsKey(toName)){ //À¯ÀúÃ¼Å©
+                                    sendToMsg(loc,name,toName,toMsg);
+                                   
+                                }else{
+                                    out.writeUTF("show|[##] ÇØ´ç À¯Àú°¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+                                }
+                               
+                            }//if
+                        }//if
+                       
+                    }else if(msg.startsWith("PvPchat")){ //1:1´ëÈ­½ÅÃ» ¼ö¶ô°á°ú¿¡ ´ëÇÑ Ã³¸®
+                        //PvPchat|result                       
+                        String result = msgArr[0];                             
+                        if(result.equals("yes")){                              
+                            chatMode = true;    
+                            clientMap.get(toNameTmp).chatMode=true;
+                            System.out.println("##1:1´ëÈ­ ¸ğµå º¯°æ");                               
+                            try {
+                                out.writeUTF("show|[##] "+toNameTmp + "´Ô°ú 1:1 ´ëÈ­¸¦ ½ÃÀÛÇÕ´Ï´Ù.");
+                                clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name + "´Ô°ú 1:1 ´ëÈ­¸¦ ½ÃÀÛÇÕ´Ï´Ù.");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else /*(r.equals("no"))*/{
+                            clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name+" ´Ô²²¼­ ´ëÈ­½ÅÃ»À» °ÅÀıÇÏ¼Ì½À´Ï´Ù.");
+                        }                      
+                       
+                    } else if(msg.startsWith("fileSend")){ //ÆÄÀÏÀü¼Û
+                        //fileSend|result    
+                        String result = msgArr[0];
+                        if(result.equals("yes")){
+                            System.out.println("##ÆÄÀÏÀü¼Û##YES");                             
+                            try {                      
+                                String tmpfileServerIP = clientMap.get(toNameTmp).fileServerIP;
+                                String tmpfilePath = clientMap.get(toNameTmp).filePath;
+                               
+                                //fileSender|filepath;    
+                                clientMap.get(toNameTmp).out.writeUTF("fileSender|"+tmpfilePath);
+                                //ÆÄÀÏÀ» Àü¼ÛÇÒ Å¬¶óÀÌ¾ğÆ®¿¡¼­ ¼­¹ö¼ÒÄÏÀ» ¿­°í filePath·Î ÀúÀåµÈ ÆÄÀÏÀ» ÀĞ¾î¿Í¼­ OutputStreamÀ¸·Î Ãâ·Â
+                               
+                                //fileReceiver|ip|fileName;
+                                //String fileName = tmpfilePath.substring(tmpfilePath.lastIndexOf("\\")+1); //ÆÄÀÏ ¸í¸¸ ÃßÃâ
+                                String fileName = new File(tmpfilePath).getName();
+                                out.writeUTF("fileReceiver|"+tmpfileServerIP+"|"+fileName);                                        
+                               
+                                /*¸®¼Â*/
+                                clientMap.get(toNameTmp).filePath="";
+                                clientMap.get(toNameTmp).fileServerIP="";
+                               
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else /*(result.equals("no"))*/{
+                            clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name+" ´Ô²²¼­ ÆÄÀÏÀü¼ÛÀ» °ÅÀıÇÏ¿´½À´Ï´Ù.");
+                        }//if                      
+                       
+                    }else if(msg.startsWith("req_exit")){ //Á¾·á  
+                       
+                    }
+                    //------------------------------------------------- ¸Ş¼¼Áö Ã³¸®
+                   
+             
+                }//while()---------
+            }catch(Exception e){
+                System.out.println("MultiServerRec:run():"+e.getMessage() + "----> ");
+                //e.printStackTrace();
+            }finally{
+                //¿¹¿Ü°¡ ¹ß»ıÇÒ¶§ ÅğÀå. ÇØ½¬¸Ê¿¡¼­ ÇØ´ç µ¥ÀÌÅÍ Á¦°Å.
+                //º¸Åë Á¾·áÇÏ°Å³ª ³ª°¡¸é java.net.SocketException: ¿¹¿Ü¹ß»ı
+                if(clientMap!=null){
+                    clientMap.remove(name);
+                    sendGroupMsg(loc,"## "+ name + "´ÔÀÌ ÅğÀåÇÏ¼Ì½À´Ï´Ù.");
+                    System.out.println("##ÇöÀç ¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú´Â "+(--MultiServer.connUserCount)+"¸í ÀÔ´Ï´Ù.");
+                }              
+            }
+        }//run()------------
+    }//class MultiServerRec-------------
+    //////////////////////////////////////////////////////////////////////
 }
-
