@@ -9,15 +9,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
  
-/*ÄÜ¼Ö ¸ÖÆ¼Ã¤ÆÃ ¼­¹ö ÇÁ·Î±×·¥*/
+/*ì½˜ì†” ë©€í‹°ì±„íŒ… ì„œë²„ í”„ë¡œê·¸ë¨*/
 public class MultiServer {
-    HashMap<String,HashMap<String,ServerRecThread>> globalMap; //Áö¿ªº° ÇØ½¬¸ÊÀ» °ü¸®ÇÏ´Â ÇØ½Ã¸Ê
+    HashMap<String,HashMap<String,ServerRecThread>> globalMap; //ì§€ì—­ë³„ í•´ì‰¬ë§µì„ ê´€ë¦¬í•˜ëŠ” í•´ì‹œë§µ
     ServerSocket serverSocket = null;
     Socket socket = null;
     static int connUserCount = 0;
     public MultiServer(){
        globalMap = new HashMap<String,HashMap<String, ServerRecThread>>();
-        //clientMap = new HashMap<String,DataOutputStream>(); //Å¬¶óÀÌ¾ğÆ®ÀÇ Ãâ·Â½ºÆ®¸²À» ÀúÀåÇÒ ÇØ½¬¸Ê »ı¼º.
+        //clientMap = new HashMap<String,DataOutputStream>(); //í´ë¼ì´ì–¸íŠ¸ì˜ ì¶œë ¥ìŠ¤íŠ¸ë¦¼ì„ ì €ì¥í•  í•´ì‰¬ë§µ ìƒì„±.
         Collections.synchronizedMap(globalMap);
         HashMap<String,ServerRecThread> group01 = new HashMap<String,ServerRecThread>();
         Collections.synchronizedMap(group01);
@@ -52,20 +52,20 @@ public class MultiServer {
     }
     public void init(){
         try{
-            serverSocket = new ServerSocket(9999); //9999Æ÷Æ®·Î ¼­¹ö¼ÒÄÏ °´Ã¼»ı¼º.
+            serverSocket = new ServerSocket(9999); //9999í¬íŠ¸ë¡œ ì„œë²„ì†Œì¼“ ê°ì²´ìƒì„±.
             System.out.println("##Server is started.");
-            while(true){ //¼­¹ö°¡ ½ÇÇàµÇ´Â µ¿¾È Å¬¶óÀÌ¾ğÆ®µéÀÇ Á¢¼ÓÀ» ±â´Ù¸².
-                socket = serverSocket.accept(); //Å¬¶óÀÌ¾ğÆ®ÀÇ Á¢¼ÓÀ» ±â´Ù¸®´Ù°¡ Á¢¼ÓÀÌ µÇ¸é Socket°´Ã¼¸¦ »ı¼º.
-                System.out.println(socket.getInetAddress()+":"+socket.getPort()); //Å¬¶óÀÌ¾ğÆ® Á¤º¸ (ip, Æ÷Æ®) Ãâ·Â
-                Thread msr = new ServerRecThread(socket); //¾²·¹µå »ı¼º.
-                msr.start(); //¾²·¹µå ½Ãµ¿.
+            while(true){ //ì„œë²„ê°€ ì‹¤í–‰ë˜ëŠ” ë™ì•ˆ í´ë¼ì´ì–¸íŠ¸ë“¤ì˜ ì ‘ì†ì„ ê¸°ë‹¤ë¦¼.
+                socket = serverSocket.accept(); //í´ë¼ì´ì–¸íŠ¸ì˜ ì ‘ì†ì„ ê¸°ë‹¤ë¦¬ë‹¤ê°€ ì ‘ì†ì´ ë˜ë©´ Socketê°ì²´ë¥¼ ìƒì„±.
+                System.out.println(socket.getInetAddress()+":"+socket.getPort()); //í´ë¼ì´ì–¸íŠ¸ ì •ë³´ (ip, í¬íŠ¸) ì¶œë ¥
+                Thread msr = new ServerRecThread(socket); //ì“°ë ˆë“œ ìƒì„±.
+                msr.start(); //ì“°ë ˆë“œ ì‹œë™.
             }      
            
         }catch(Exception e){
             e.printStackTrace();
         }
     }
-    /** Á¢¼ÓµÈ ¸ğµç Å¬¶óÀÌ¾ğÆ®µé¿¡°Ô ¸Ş½ÃÁö¸¦ Àü´Ş. */
+    /** ì ‘ì†ëœ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ë“¤ì—ê²Œ ë©”ì‹œì§€ë¥¼ ì „ë‹¬. */
     public void sendAllMsg(String msg){
         Iterator global_it = globalMap.keySet().iterator();
         while(global_it.hasNext()){
@@ -81,14 +81,14 @@ public class MultiServer {
             }
         }
     }//sendAllMsg()-----------
-    /**ÇØ´ç Å¬¶óÀÌ¾ğÆ®°¡ ¼ÓÇØÀÖ´Â ±×·ì¿¡´ëÇØ¼­¸¸ ¸Ş½ÃÁö Àü´Ş.*/
+    /**í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ê°€ ì†í•´ìˆëŠ” ê·¸ë£¹ì—ëŒ€í•´ì„œë§Œ ë©”ì‹œì§€ ì „ë‹¬.*/
     public void sendGroupMsg(String loc, String msg){      
         HashMap<String, ServerRecThread> gMap = globalMap.get(loc);    
         Iterator<String> group_it = globalMap.get(loc).keySet().iterator();        
         while(group_it.hasNext()){
             try{    
                     ServerRecThread st = gMap.get(group_it.next());
-                    if(!st.chatMode){ //1:1´ëÈ­¸ğµå°¡ ¾Æ´Ñ »ç¶÷¿¡°Ô¸¸.
+                    if(!st.chatMode){ //1:1ëŒ€í™”ëª¨ë“œê°€ ì•„ë‹Œ ì‚¬ëŒì—ê²Œë§Œ.
                         st.out.writeUTF(msg);  
                     }
             }catch(Exception e){
@@ -96,7 +96,7 @@ public class MultiServer {
             }
         }  
     }//sendGroupMsg()-----------
-    /**1:1 ´ëÈ­*/
+    /**1:1 ëŒ€í™”*/
     public void sendPvPMsg(String loc,String fromName, String toName, String msg){
      
             try {
@@ -108,7 +108,7 @@ public class MultiServer {
          
     }//sendPvPMsg()-----------
    
-    /** ±Ó¼Ó¸» */
+    /** ê·“ì†ë§ */
     public void sendToMsg(String loc, String fromName, String toName, String msg){     
         try{
                 globalMap.get(loc).get(toName).out.writeUTF("whisper|"+fromName+"|"+msg);
@@ -119,14 +119,14 @@ public class MultiServer {
            }
          
      }
-    /**°¢±×·ìÀÇ Á¢¼ÓÀÚ¼ö¿Í ¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú¸¦ ¹İÈ¯
-     * ÇÏ´Â ¸Ş¼Òµå**/
+    /**ê°ê·¸ë£¹ì˜ ì ‘ì†ììˆ˜ì™€ ì„œë²„ì— ì ‘ì†ëœ ìœ ì €ë¥¼ ë°˜í™˜
+     * í•˜ëŠ” ë©”ì†Œë“œ**/
     public String getEachMapSize(){
         return getEachMapSize(null);    
     }//getEachMapSize()-----------
    
-    /**°¢±×·ìÀÇ Á¢¼ÓÀÚ¼ö¿Í ¼­¹ö¿¡ Á¢¼ÓµÈ À¯Àú¸¦ ¹İÈ¯ ÇÏ´Â ¸Ş¼Òµå
-     * Ãß°¡ Áö¿ªÀ» Àü´Ş¹ŞÀ¸¸é ÇØ´ç Áö¿ªÀ» Ã¼Å©
+    /**ê°ê·¸ë£¹ì˜ ì ‘ì†ììˆ˜ì™€ ì„œë²„ì— ì ‘ì†ëœ ìœ ì €ë¥¼ ë°˜í™˜ í•˜ëŠ” ë©”ì†Œë“œ
+     * ì¶”ê°€ ì§€ì—­ì„ ì „ë‹¬ë°›ìœ¼ë©´ í•´ë‹¹ ì§€ì—­ì„ ì²´í¬
      * */
     public String getEachMapSize(String loc){
        
@@ -139,23 +139,23 @@ public class MultiServer {
                 String key = (String) global_it.next();
                
                 HashMap<String, ServerRecThread> it_hash = globalMap.get(key);
-                //if(key.equals(loc)) key+="(*)"; //ÇöÀç À¯Àú°¡ Á¢¼ÓµÈ °÷ Ç¥½Ã
+                //if(key.equals(loc)) key+="(*)"; //í˜„ì¬ ìœ ì €ê°€ ì ‘ì†ëœ ê³³ í‘œì‹œ
                 int size = it_hash.size();
                 sum +=size;
                 sb.append(key+": ("+size+"people)"+(key.equals(loc)?"(*)":"")+"\r\n");
                
             }catch(Exception e){
-                System.out.println("¿¹¿Ü:"+e);
+                System.out.println("ì˜ˆì™¸:"+e);
             }
         }
-        //sb.append("¢ÁÇöÀç ´ëÈ­¿¡ Âü¿©ÇÏ°íÀÖ´Â À¯Àú¼ö :"+ MultiServer.connUserCount);
-        sb.append("¢ÁJoining People :"+ sum+ " people \r\n");
+        //sb.append("âŠ™í˜„ì¬ ëŒ€í™”ì— ì°¸ì—¬í•˜ê³ ìˆëŠ” ìœ ì €ìˆ˜ :"+ MultiServer.connUserCount);
+        sb.append("âŠ™Joining People :"+ sum+ " people \r\n");
         //System.out.println(sb.toString());
         return sb.toString();
     }//getEachMapSize()-----------
    
    
-    /**Á¢¼ÓµÈ À¯Àú Áßº¹Ã¼Å©*/        
+    /**ì ‘ì†ëœ ìœ ì € ì¤‘ë³µì²´í¬*/        
 public boolean isNameGlobal(String name){
         boolean result=false;
         Iterator<String> global_it = globalMap.keySet().iterator();
@@ -164,19 +164,19 @@ public boolean isNameGlobal(String name){
                 String key = global_it.next();             
                 HashMap<String, ServerRecThread> it_hash = globalMap.get(key);
                 if(it_hash.containsKey(name)){
-                    result= true; //Áßº¹µÈ ¾ÆÀÌµğ°¡ Á¸Àç.
+                    result= true; //ì¤‘ë³µëœ ì•„ì´ë””ê°€ ì¡´ì¬.
                     break;
                 }
                
             }catch(Exception e){
-                System.out.println("isNameGlobal()¿¹¿Ü:"+e);
+                System.out.println("isNameGlobal()ì˜ˆì™¸:"+e);
             }
         }
         return result;
     }
  
    
-    /**¹®ÀÚ¿­ null °ª ¹× "" Àº ´ëÃ¼ ¹®ÀÚ¿­·Î »ğÀÔ°¡´É.*/
+    /**ë¬¸ìì—´ null ê°’ ë° "" ì€ ëŒ€ì²´ ë¬¸ìì—´ë¡œ ì‚½ì…ê°€ëŠ¥.*/
     public String nVL(String str, String replace){
         String output="";
         if(str==null || str.trim().equals("")){
@@ -187,121 +187,121 @@ public boolean isNameGlobal(String name){
         return output;     
     }
     
-    //main¸Ş¼­µå
+    //mainë©”ì„œë“œ
     public static void main(String[] args) {
-        MultiServer ms = new MultiServer(); //¼­¹ö°´Ã¼ »ı¼º.
-        ms.init();//½ÇÇà.
+        MultiServer ms = new MultiServer(); //ì„œë²„ê°ì²´ ìƒì„±.
+        ms.init();//ì‹¤í–‰.
     }//main()------  
    
    
    
     ////////////////////////////////////////////////////////////////////////
-    //----// ³»ºÎ Å¬·¡½º //--------//
+    //----// ë‚´ë¶€ í´ë˜ìŠ¤ //--------//
    
-    // Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ÀĞ¾î¿Â ¸Ş½ÃÁö¸¦ ´Ù¸¥ Å¬¶óÀÌ¾ğÆ®(socket)¿¡ º¸³»´Â ¿ªÇÒÀ» ÇÏ´Â ¸Ş¼­µå
+    // í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ì½ì–´ì˜¨ ë©”ì‹œì§€ë¥¼ ë‹¤ë¥¸ í´ë¼ì´ì–¸íŠ¸(socket)ì— ë³´ë‚´ëŠ” ì—­í• ì„ í•˜ëŠ” ë©”ì„œë“œ
     class ServerRecThread extends Thread {
         Socket socket;
         DataInputStream in;
         DataOutputStream out;
-        String name=""; //ÀÌ¸§ ÀúÀå
-        String loc="";  //Áö¿ª ÀúÀå
-        String toNameTmp = null;//1:1´ëÈ­ »ó´ë  
-        String fileServerIP; //ÆÄÀÏ¼­¹ö ¾ÆÀÌÇÇ ÀúÀå
-        String filePath; //ÆÄÀÏ ¼­¹ö¿¡¼­ Àü¼ÛÇÒ ÆÄÀÏ ÆĞ½º ÀúÀå.
-        boolean chatMode; //1:1´ëÈ­¸ğµå ¿©ºÎ
+        String name=""; //ì´ë¦„ ì €ì¥
+        String loc="";  //ì§€ì—­ ì €ì¥
+        String toNameTmp = null;//1:1ëŒ€í™” ìƒëŒ€  
+        String fileServerIP; //íŒŒì¼ì„œë²„ ì•„ì´í”¼ ì €ì¥
+        String filePath; //íŒŒì¼ ì„œë²„ì—ì„œ ì „ì†¡í•  íŒŒì¼ íŒ¨ìŠ¤ ì €ì¥.
+        boolean chatMode; //1:1ëŒ€í™”ëª¨ë“œ ì—¬ë¶€
        
        public ServerRecThread(Socket socket){
             this.socket = socket;
             try{
-                //SocketÀ¸·ÎºÎÅÍ ÀÔ·Â½ºÆ®¸²À» ¾ò´Â´Ù.
+                //Socketìœ¼ë¡œë¶€í„° ì…ë ¥ìŠ¤íŠ¸ë¦¼ì„ ì–»ëŠ”ë‹¤.
                 in = new DataInputStream(socket.getInputStream());
-                //SocketÀ¸·ÎºÎÅÍ Ãâ·Â½ºÆ®¸²À» ¾ò´Â´Ù.
+                //Socketìœ¼ë¡œë¶€í„° ì¶œë ¥ìŠ¤íŠ¸ë¦¼ì„ ì–»ëŠ”ë‹¤.
                 out = new DataOutputStream(socket.getOutputStream());
             }catch(Exception e){
-                System.out.println("ServerRecThread »ı¼ºÀÚ ¿¹¿Ü:"+e);
+                System.out.println("ServerRecThread ìƒì„±ì ì˜ˆì™¸:"+e);
             }
-        }//»ı¼ºÀÚ ------------
+        }//ìƒì„±ì ------------
        
        
        
-        /**Á¢¼ÓµÈ À¯Àú¸®½ºÆ®  ¹®ÀÚ¿­·Î ¹İÈ¯*/        
+        /**ì ‘ì†ëœ ìœ ì €ë¦¬ìŠ¤íŠ¸  ë¬¸ìì—´ë¡œ ë°˜í™˜*/        
         public String showUserList(){
            
             StringBuilder output = new StringBuilder("==List of Users==\r\n");
-            Iterator it = globalMap.get(loc).keySet().iterator(); //ÇØ½¬¸Ê¿¡ µî·ÏµÈ »ç¿ëÀÚÀÌ¸§À» °¡Á®¿È.
-            while(it.hasNext()){ //¹İº¹ÇÏ¸é¼­ »ç¿ëÀÚÀÌ¸§À» StringBuilder¿¡ Ãß°¡
+            Iterator it = globalMap.get(loc).keySet().iterator(); //í•´ì‰¬ë§µì— ë“±ë¡ëœ ì‚¬ìš©ìì´ë¦„ì„ ê°€ì ¸ì˜´.
+            while(it.hasNext()){ //ë°˜ë³µí•˜ë©´ì„œ ì‚¬ìš©ìì´ë¦„ì„ StringBuilderì— ì¶”ê°€
                  try{
                     String key= (String) it.next();                                    
                     //out.writeUTF(output);
-                    if(key.equals(name)){ //ÇöÀç»ç¿ëÀÚ Ã¼Å©
+                    if(key.equals(name)){ //í˜„ì¬ì‚¬ìš©ì ì²´í¬
                         key += " (*) ";
                     }
                     output.append(key+"\r\n");                  
                  }catch(Exception e){
-                     System.out.println("¿¹¿Ü:"+e);
+                     System.out.println("ì˜ˆì™¸:"+e);
                  }
              }//while---------
             output.append("=="+ globalMap.get(loc).size()+"people online==\r\n");
             System.out.println(output.toString());
             return output.toString();
          }//showUserList()-----------
-       /**¸Ş½ÃÁö ÆÄ¼­ */    
+       /**ë©”ì‹œì§€ íŒŒì„œ */    
        public String[] getMsgParse(String msg){
             System.out.println("msgParse():msg?   "+ msg);         
             String[] tmpArr = msg.split("[|]");        
             return tmpArr;
         }
         @Override
-        public void run(){ //¾²·¹µå¸¦ »ç¿ëÇÏ±â À§ÇØ¼­ run()¸Ş¼­µå ÀçÁ¤ÀÇ
-            HashMap<String, ServerRecThread> clientMap=null;   //ÇöÀç Å¬¶óÀÌ¾ğÆ®°¡ ÀúÀåµÇ¾îÀÖ´Â ÇØ½¬¸Ê        
+        public void run(){ //ì“°ë ˆë“œë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•´ì„œ run()ë©”ì„œë“œ ì¬ì •ì˜
+            HashMap<String, ServerRecThread> clientMap=null;   //í˜„ì¬ í´ë¼ì´ì–¸íŠ¸ê°€ ì €ì¥ë˜ì–´ìˆëŠ” í•´ì‰¬ë§µ        
             try{  
-                while(in!=null){ //ÀÔ·Â½ºÆ®¸²ÀÌ nullÀÌ ¾Æ´Ï¸é ¹İº¹.
-                    String msg = in.readUTF(); //ÀÔ·Â½ºÆ®¸²À» ÅëÇØ ÀĞ¾î¿Â ¹®ÀÚ¿­À» msg¿¡ ÇÒ´ç.                   
+                while(in!=null){ //ì…ë ¥ìŠ¤íŠ¸ë¦¼ì´ nullì´ ì•„ë‹ˆë©´ ë°˜ë³µ.
+                    String msg = in.readUTF(); //ì…ë ¥ìŠ¤íŠ¸ë¦¼ì„ í†µí•´ ì½ì–´ì˜¨ ë¬¸ìì—´ì„ msgì— í• ë‹¹.                   
                     String[] msgArr = getMsgParse(msg.substring(msg.indexOf("|")+1));
-                    //¸Ş¼¼Áö Ã³¸® ----------------------------------------------
-                    if(msg.startsWith("req_logon")){ //·Î±×¿Â ½Ãµµ (´ëÈ­¸í)                    
-                        //req_logon|´ëÈ­¸í
+                    //ë©”ì„¸ì§€ ì²˜ë¦¬ ----------------------------------------------
+                    if(msg.startsWith("req_logon")){ //ë¡œê·¸ì˜¨ ì‹œë„ (ëŒ€í™”ëª…)                    
+                        //req_logon|ëŒ€í™”ëª…
                         if(!(msgArr[0].trim().equals(""))&&!isNameGlobal(msgArr[0])){                      
-                            name = msgArr[0]; //³Ñ¾î¿Â ´ëÈ­¸íÀº Àü¿ªº¯¼ö name¿¡ ÀúÀå
-                            MultiServer.connUserCount++; //Á¢¼ÓÀÚ¼ö Áõ°¡. (½ºÅÃÆ½º¯¼ö¸¦ »ç¿ëÇÏ±â¿¡ ¾î¿ï·Á¼­ ÇÑ¹ø »ç¿ëÇØº½.)
-                            out.writeUTF("logon#yes|"+getEachMapSize()); //Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ®¿¡°Ô ±×·ì¸ñ·Ï Á¦°ø
+                            name = msgArr[0]; //ë„˜ì–´ì˜¨ ëŒ€í™”ëª…ì€ ì „ì—­ë³€ìˆ˜ nameì— ì €ì¥
+                            MultiServer.connUserCount++; //ì ‘ì†ììˆ˜ ì¦ê°€. (ìŠ¤íƒí‹±ë³€ìˆ˜ë¥¼ ì‚¬ìš©í•˜ê¸°ì— ì–´ìš¸ë ¤ì„œ í•œë²ˆ ì‚¬ìš©í•´ë´„.)
+                            out.writeUTF("logon#yes|"+getEachMapSize()); //ì ‘ì†ëœ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ê·¸ë£¹ëª©ë¡ ì œê³µ
                         }else{
                              out.writeUTF("logon#no|err01");
                         }
-                    }else if(msg.startsWith("req_enterRoom")){ //±×·ìÀÔÀåÀ» ½Ãµµ
+                    }else if(msg.startsWith("req_enterRoom")){ //ê·¸ë£¹ì…ì¥ì„ ì‹œë„
                        
-                        //req_enterRoom|´ëÈ­¸í|Áö¿ª
-                         loc = msgArr[1]; //¸Ş½ÃÁö¿¡¼­ Áö¿ªºÎºĞ¸¸ ÃßÃâÇÏ¿© Àü¿ªº¯¼ö¿¡ ÀúÀå
+                        //req_enterRoom|ëŒ€í™”ëª…|ì§€ì—­
+                         loc = msgArr[1]; //ë©”ì‹œì§€ì—ì„œ ì§€ì—­ë¶€ë¶„ë§Œ ì¶”ì¶œí•˜ì—¬ ì „ì—­ë³€ìˆ˜ì— ì €ì¥
                          
                          if(isNameGlobal(msgArr[0])){
                              out.writeUTF("logon#no|"+name);  
                              
                          }else if(globalMap.containsKey(loc)){
                              sendGroupMsg(loc, "show|[##] "+name + "Entered the room.");
-                             clientMap= globalMap.get(loc); //ÇöÀç±×·ìÀÇ ÇØ½¬¸ÊÀ» µû·Î ÀúÀå.
-                             clientMap.put(name, this); //ÇöÀç MultiServerRecÀÎ½ºÅÏ½º¸¦ Å¬¶óÀÌ¾ğÆ®¸Ê¿¡ ÀúÀå.
-                             System.out.println(getEachMapSize()); //¼­¹ö¿¡ ±×·ì¸®½ºÆ® Ãâ·Â.                       
-                             out.writeUTF("enterRoom#yes|"+loc); //Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ®¿¡°Ô ±×·ì¸ñ·Ï Á¦°ø
+                             clientMap= globalMap.get(loc); //í˜„ì¬ê·¸ë£¹ì˜ í•´ì‰¬ë§µì„ ë”°ë¡œ ì €ì¥.
+                             clientMap.put(name, this); //í˜„ì¬ MultiServerRecì¸ìŠ¤í„´ìŠ¤ë¥¼ í´ë¼ì´ì–¸íŠ¸ë§µì— ì €ì¥.
+                             System.out.println(getEachMapSize()); //ì„œë²„ì— ê·¸ë£¹ë¦¬ìŠ¤íŠ¸ ì¶œë ¥.                       
+                             out.writeUTF("enterRoom#yes|"+loc); //ì ‘ì†ëœ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ê·¸ë£¹ëª©ë¡ ì œê³µ
                              
                          }else{                        
                              out.writeUTF("enterRoom#no|"+loc);                              
                          }
                          
-                    }else if(msg.startsWith("req_cmdMsg")){ //¸í·É¾î Àü¼Û
-                        //req_cmdMsg|´ëÈ­¸í|/Á¢¼ÓÀÚ
+                    }else if(msg.startsWith("req_cmdMsg")){ //ëª…ë ¹ì–´ ì „ì†¡
+                        //req_cmdMsg|ëŒ€í™”ëª…|/ì ‘ì†ì
                         if(msgArr[1].trim().equals("/users")){
-                            out.writeUTF("show|"+showUserList()); //Á¢¼ÓÀÚ Ãâ·Â                             
+                            out.writeUTF("show|"+showUserList()); //ì ‘ì†ì ì¶œë ¥                             
                         }else if(msgArr[1].trim().startsWith("/whisper")){
-                            //req_cmdMsg|´ëÈ­¸í|/±Ó¼Ó¸» »ó´ë¹æ´ëÈ­¸í ´ëÈ­³»¿ë
+                            //req_cmdMsg|ëŒ€í™”ëª…|/ê·“ì†ë§ ìƒëŒ€ë°©ëŒ€í™”ëª… ëŒ€í™”ë‚´ìš©
                             String[] msgSubArr = msgArr[1].split(" ",3);                        
                             if(msgSubArr==null||msgSubArr.length<3){
-                                out.writeUTF("show|[##] The usage of whipser is wrong.\r\n usage : /±Ó¼Ó¸» [receiver] [message].");
+                                out.writeUTF("show|[##] The usage of whipser is wrong.\r\n usage : /ê·“ì†ë§ [receiver] [message].");
                             }else if(name.equals(msgSubArr[1])){
-                                out.writeUTF("show|[##] You cannot whisper to yourself.\r\n usage : /±Ó¼Ó¸» [receiver] [message].");
+                                out.writeUTF("show|[##] You cannot whisper to yourself.\r\n usage : /ê·“ì†ë§ [receiver] [message].");
                             }else{
                                 String toName = msgSubArr[1];
                                 String toMsg = msgSubArr[2];
-                                if(clientMap.containsKey(toName)){ //À¯ÀúÃ¼Å©
+                                if(clientMap.containsKey(toName)){ //ìœ ì €ì²´í¬
                                     System.out.println("Whisper!");
                                     sendToMsg(loc,name,toName,toMsg);
                                 }else{
@@ -310,10 +310,10 @@ public boolean isNameGlobal(String name){
                             }                         
                         }else if(msgArr[1].trim().startsWith("/changeroom")){
                             String[] msgSubArr = msg.split(" ");                           
-                            if(msgSubArr.length==1){ // º¯°æÇÒ Áö¿ªÀ» ÀÔ·Â¾ÈÇÏ°í /Áö¿ª¸¸ÀÔ·ÂÇßÀ»°æ¿ì Áö¿ª¸ñ·Ï Ãâ·Â                               
+                            if(msgSubArr.length==1){ // ë³€ê²½í•  ì§€ì—­ì„ ì…ë ¥ì•ˆí•˜ê³  /ì§€ì—­ë§Œì…ë ¥í–ˆì„ê²½ìš° ì§€ì—­ëª©ë¡ ì¶œë ¥                               
                                 out.writeUTF("show|"+getEachMapSize(loc));                             
                             }else if(msgSubArr.length==2) {
-                                String tmpLoc = msgSubArr[1]; //Áö¿ª
+                                String tmpLoc = msgSubArr[1]; //ì§€ì—­
                                
                                 if(loc.equals(tmpLoc)){
                                     out.writeUTF("show|[##] The usage of command is wrong.\r\n You cannot choose current room.\r\n " +
@@ -321,9 +321,9 @@ public boolean isNameGlobal(String name){
                                                 "\r\n usage : Changing room : /changeroom [roomname].");
                                     continue;
                                 }
-                                if(globalMap.containsKey(tmpLoc)&& !this.chatMode){ //Áö¿ªÃ¼Å©
+                                if(globalMap.containsKey(tmpLoc)&& !this.chatMode){ //ì§€ì—­ì²´í¬
                                         out.writeUTF("show|[##] Change "+loc+" to "+ tmpLoc+". ");                        
-                                        clientMap.remove(name); //ÇöÀç Áö¿ª ÇØ½¬¸Ê¿¡¼­ ÇØ´ç ¾²·¹µå¸¦ Á¦°Å.
+                                        clientMap.remove(name); //í˜„ì¬ ì§€ì—­ í•´ì‰¬ë§µì—ì„œ í•´ë‹¹ ì“°ë ˆë“œë¥¼ ì œê±°.
                                         sendGroupMsg(loc, "show|[##] "+name+"exit the room.");
                                         System.out.println("Remove " + name + " at previous room (" + loc + ")");
                                         loc = tmpLoc;
@@ -352,9 +352,9 @@ public boolean isNameGlobal(String name){
                             if(!chatMode){
                                 String toName = msgSubArr[1].trim();
                                 out.writeUTF("show|[##] "+ "Request PvP chat to " + toName);
-                                if(clientMap.containsKey(toName) && !clientMap.get(toName).chatMode){ //À¯ÀúÃ¼Å©
-                                    //req_PvPchat|½ÅÃ»ÀÚ|ÀÀ´äÀÚ|¸Ş½ÃÁö .... Ãë¼Ò
-                                    //req_PvPchat|¸Ş½ÃÁö .... ·Î º¯°æ
+                                if(clientMap.containsKey(toName) && !clientMap.get(toName).chatMode){ //ìœ ì €ì²´í¬
+                                    //req_PvPchat|ì‹ ì²­ì|ì‘ë‹µì|ë©”ì‹œì§€ .... ì·¨ì†Œ
+                                    //req_PvPchat|ë©”ì‹œì§€ .... ë¡œ ë³€ê²½
                                    
                                     clientMap.get(toName).out.writeUTF("req_PvPchat|[##] "+name+" requested PvP Chat\r\n Would you accept?(y,n)");  
                                     toNameTmp = toName;
@@ -367,9 +367,9 @@ public boolean isNameGlobal(String name){
                             }
                         }else if(msgArr[1].startsWith("/end")){
                             if(chatMode){
-                                chatMode = false; //1:1´ëÈ­¸ğµå ÇØÁ¦
+                                chatMode = false; //1:1ëŒ€í™”ëª¨ë“œ í•´ì œ
                                 out.writeUTF("show|[##] Quit PvP chat with " +toNameTmp);
-                                clientMap.get(toNameTmp).chatMode=false; //»ó´ë¹æµµ 1:1´ëÈ­¸ğµå ÇØÁ¦
+                                clientMap.get(toNameTmp).chatMode=false; //ìƒëŒ€ë°©ë„ 1:1ëŒ€í™”ëª¨ë“œ í•´ì œ
                                 clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name +" quit PvP chat");
                                 toNameTmp="";
                                 clientMap.get(toNameTmp).toNameTmp="";
@@ -397,11 +397,11 @@ public boolean isNameGlobal(String name){
                                 String fileExt = filePath.substring(filePath.lastIndexOf(".")+1);
                                 if(availExtList.contains(fileExt)){
                                     Socket s = globalMap.get(loc).get(toNameTmp).socket;
-                                    //ÆÄÀÏ¼­¹ö¿ªÇÒÀ» ÇÏ´Â Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌÇÇ ÁÖ¼Ò ¾Ë±âÀ§ÇØ ¼ÒÄÏ °´Ã¼ ¾ò¾î¿È.
+                                    //íŒŒì¼ì„œë²„ì—­í• ì„ í•˜ëŠ” í´ë¼ì´ì–¸íŠ¸ ì•„ì´í”¼ ì£¼ì†Œ ì•Œê¸°ìœ„í•´ ì†Œì¼“ ê°ì²´ ì–»ì–´ì˜´.
                                     System.out.println("s.getInetAddress():IP of fileserver=>"+s.getInetAddress());
-                                    //ÆÄÀÏ¼­¹ö¿ªÇÒÀ» ÇÏ´Â Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌÇÇ Ãâ·Â
+                                    //íŒŒì¼ì„œë²„ì—­í• ì„ í•˜ëŠ” í´ë¼ì´ì–¸íŠ¸ ì•„ì´í”¼ ì¶œë ¥
                                     fileServerIP = s.getInetAddress().getHostAddress();
-                                    clientMap.get(toNameTmp).out.writeUTF("req_fileSend|[##] "+name +" is trying to send["+sendFile.getName()+"] \r\n¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?(Y/N)");                        
+                                    clientMap.get(toNameTmp).out.writeUTF("req_fileSend|[##] "+name +" is trying to send["+sendFile.getName()+"] \r\nìˆ˜ë½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?(Y/N)");                        
                                     out.writeUTF("show|[##] "+ "Sending file["+sendFile.getAbsolutePath()+"] to " + toNameTmp);
                                 }else{
                                     out.writeUTF("show|[##] You can't send this file. \r\nYou only can send file having extension with ["+availExtList+"].");                             
@@ -412,33 +412,33 @@ public boolean isNameGlobal(String name){
                         }else{
                             out.writeUTF("show|[##] Wrong Command.");
                         }//if
-                    }else if(msg.startsWith("req_say")){ //´ëÈ­³»¿ë Àü¼Û
+                    }else if(msg.startsWith("req_say")){ //ëŒ€í™”ë‚´ìš© ì „ì†¡
                           if(!chatMode){
-                            //req_say|¾ÆÀÌµğ|´ëÈ­³»¿ë
+                            //req_say|ì•„ì´ë””|ëŒ€í™”ë‚´ìš©
                             sendGroupMsg(loc, "say|"+name+"|"+msgArr[1]);
-                            //Ãâ·Â½ºÆ®¸²À¸·Î º¸³½´Ù.
+                            //ì¶œë ¥ìŠ¤íŠ¸ë¦¼ìœ¼ë¡œ ë³´ë‚¸ë‹¤.
                           }else{
                             sendPvPMsg(loc, name,toNameTmp , "say|"+name+"|"+msgArr[1]);
                           }
-                    }else if(msg.startsWith("req_whisper")){ //±Ó¼Ó¸» Àü¼Û
+                    }else if(msg.startsWith("req_whisper")){ //ê·“ì†ë§ ì „ì†¡
                         if(msgArr[1].trim().startsWith("/whisper")){
-                            //req_cmdMsg|´ëÈ­¸í|/±Ó¼Ó¸» »ó´ë¹æ´ëÈ­¸í ´ëÈ­³»¿ë
-                            String[] msgSubArr = msgArr[1].split(" ",3); //¹Ş¾Æ¿Â msgÀ» " "(°ø¹é)À» ±âÁØÀ¸·Î 3°³¸¦ ºĞ¸®
+                            //req_cmdMsg|ëŒ€í™”ëª…|/ê·“ì†ë§ ìƒëŒ€ë°©ëŒ€í™”ëª… ëŒ€í™”ë‚´ìš©
+                            String[] msgSubArr = msgArr[1].split(" ",3); //ë°›ì•„ì˜¨ msgì„ " "(ê³µë°±)ì„ ê¸°ì¤€ìœ¼ë¡œ 3ê°œë¥¼ ë¶„ë¦¬
                                                            
                             if(msgSubArr==null||msgSubArr.length<3){
                                 out.writeUTF("show|[##] The usage of command is wrong.\r\n usage : /whisper [opponen'ts name] [message].");
                             }else{
                                 String toName = msgSubArr[1];
-                                //String toMsg = "±Ó:from("+name+")=>"+((msgArr[2]!=null)?msgArr[2]:"");
+                                //String toMsg = "ê·“:from("+name+")=>"+((msgArr[2]!=null)?msgArr[2]:"");
                                 String toMsg = msgSubArr[2];
-                                if(clientMap.containsKey(toName)){ //À¯ÀúÃ¼Å©
+                                if(clientMap.containsKey(toName)){ //ìœ ì €ì²´í¬
                                     sendToMsg(loc,name,toName,toMsg);
                                 }else{
                                     out.writeUTF("show|[##] The user does not exist.");
                                 }
                             }
                         }
-                    }else if(msg.startsWith("PvPchat")){ //1:1´ëÈ­½ÅÃ» ¼ö¶ô°á°ú¿¡ ´ëÇÑ Ã³¸®
+                    }else if(msg.startsWith("PvPchat")){ //1:1ëŒ€í™”ì‹ ì²­ ìˆ˜ë½ê²°ê³¼ì— ëŒ€í•œ ì²˜ë¦¬
                         //PvPchat|result                       
                         String result = msgArr[0];                             
                         if(result.equals("yes")){                              
@@ -454,7 +454,7 @@ public boolean isNameGlobal(String name){
                         }else /*(r.equals("no"))*/{
                             clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name+" rejected pvp chat");
                         }                      
-                    } else if(msg.startsWith("fileSend")){ //ÆÄÀÏÀü¼Û
+                    } else if(msg.startsWith("fileSend")){ //íŒŒì¼ì „ì†¡
                         //fileSend|result    
                         String result = msgArr[0];
                         if(result.equals("yes")){
@@ -464,13 +464,13 @@ public boolean isNameGlobal(String name){
                                 String tmpfilePath = clientMap.get(toNameTmp).filePath;
                                 //fileSender|filepath;    
                                 clientMap.get(toNameTmp).out.writeUTF("fileSender|"+tmpfilePath);
-                                //ÆÄÀÏÀ» Àü¼ÛÇÒ Å¬¶óÀÌ¾ğÆ®¿¡¼­ ¼­¹ö¼ÒÄÏÀ» ¿­°í filePath·Î ÀúÀåµÈ ÆÄÀÏÀ» ÀĞ¾î¿Í¼­ OutputStreamÀ¸·Î Ãâ·Â
+                                //íŒŒì¼ì„ ì „ì†¡í•  í´ë¼ì´ì–¸íŠ¸ì—ì„œ ì„œë²„ì†Œì¼“ì„ ì—´ê³  filePathë¡œ ì €ì¥ëœ íŒŒì¼ì„ ì½ì–´ì™€ì„œ OutputStreamìœ¼ë¡œ ì¶œë ¥
                                 //fileReceiver|ip|fileName;
-                                //String fileName = tmpfilePath.substring(tmpfilePath.lastIndexOf("\\")+1); //ÆÄÀÏ ¸í¸¸ ÃßÃâ
+                                //String fileName = tmpfilePath.substring(tmpfilePath.lastIndexOf("\\")+1); //íŒŒì¼ ëª…ë§Œ ì¶”ì¶œ
                                 String fileName = new File(tmpfilePath).getName();
                                 out.writeUTF("fileReceiver|"+tmpfileServerIP+"|"+fileName);                                        
                                
-                                /*¸®¼Â*/
+                                /*ë¦¬ì…‹*/
                                 clientMap.get(toNameTmp).filePath="";
                                 clientMap.get(toNameTmp).fileServerIP="";
                                
@@ -480,10 +480,10 @@ public boolean isNameGlobal(String name){
                         }else /*(result.equals("no"))*/{
                             clientMap.get(toNameTmp).out.writeUTF("show|[##] "+name+" rejected filesend.");
                         }//if                      
-                    }else if(msg.startsWith("req_exit")){ //Á¾·á  
+                    }else if(msg.startsWith("req_exit")){ //ì¢…ë£Œ  
                        
                     }
-                    //------------------------------------------------- ¸Ş¼¼Áö Ã³¸®
+                    //------------------------------------------------- ë©”ì„¸ì§€ ì²˜ë¦¬
                    
              
                 }//while()---------
@@ -491,8 +491,8 @@ public boolean isNameGlobal(String name){
                 System.out.println("MultiServerRec:run():"+e.getMessage() + "----> ");
                 //e.printStackTrace();
             }finally{
-                //¿¹¿Ü°¡ ¹ß»ıÇÒ¶§ ÅğÀå. ÇØ½¬¸Ê¿¡¼­ ÇØ´ç µ¥ÀÌÅÍ Á¦°Å.
-                //º¸Åë Á¾·áÇÏ°Å³ª ³ª°¡¸é java.net.SocketException: ¿¹¿Ü¹ß»ı
+                //ì˜ˆì™¸ê°€ ë°œìƒí• ë•Œ í‡´ì¥. í•´ì‰¬ë§µì—ì„œ í•´ë‹¹ ë°ì´í„° ì œê±°.
+                //ë³´í†µ ì¢…ë£Œí•˜ê±°ë‚˜ ë‚˜ê°€ë©´ java.net.SocketException: ì˜ˆì™¸ë°œìƒ
                 if(clientMap!=null){
                     clientMap.remove(name);
                     sendGroupMsg(loc,"## "+ name + "exit the server.");
