@@ -27,10 +27,10 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
     public void run() {
         try {
             ServerSocket serverSocket = new ServerSocket(9990);
-            System.out.println("====================> ÆÄÀÏ¼­¹ö ¼¼ÆÃ¿Ï·á");
+            System.out.println("====================> Ready to send file");
             serverSocket.setSoTimeout(5000);
             Socket socket = serverSocket.accept();
-            System.out.println("====================> ÆÄÀÏÀü¼Û ½ÃÀÛ");
+            System.out.println("====================> File Send Start");
             FileInputStream fis = new FileInputStream(filePath);
             BufferedInputStream bis = new BufferedInputStream(fis);
             OutputStream out = socket.getOutputStream();
@@ -40,7 +40,7 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
                 bos.write(r);                          
             }
            
-            System.out.println("====================> ÆÄÀÏÀü¼Û ¿Ï·á");
+            System.out.println("====================> File Send Complete");
            
             bos.close();
             bis.close();
@@ -51,7 +51,7 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
            
         } catch (IOException e) {      
             e.printStackTrace();
-            System.out.println("====================> ÆÄÀÏÀü¼Û ½ÇÆÐ");
+            System.out.println("====================> File Send Failed");
         }
     }
 }
@@ -74,7 +74,7 @@ class FileReceiver extends Thread{
         try {
             this.filename = filename;
             socket = new Socket(ip,9990);
-            System.out.println("====================> ÆÄÀÏ´Ù¿î·Îµå ½ÃÀÛ");
+            System.out.println("====================> Start File Download");
             in = socket.getInputStream();
             bis = new BufferedInputStream(in);
            
@@ -100,13 +100,13 @@ class FileReceiver extends Thread{
                 bos.write(r);
             }
             System.out.println("====================> Down"+fileSeparator+filename);
-            System.out.println("====================> ÆÄÀÏ´Ù¿î·Îµå ¿Ï·á");
+            System.out.println("====================> File Download Complete");
         } catch (FileNotFoundException e) {        
             System.out.println("¿¹¿Ü: "+e.getMessage());
             //e.printStackTrace();
         } catch (IOException e) {          
             //e.printStackTrace();
-            System.out.println("====================> ÆÄÀÏÀü¼Û ½ÇÆÐ");
+            System.out.println("====================> File Send Failed");
         }finally{
             try {
                 fos.close();
