@@ -15,7 +15,7 @@ public class FileTrans {
 	
 }
 
-class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾ðÆ®¿¡°Ô Àü¼Û.
+class FileSender extends Thread{
     String filePath;
     public FileSender() {
        
@@ -23,7 +23,6 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
     public FileSender(String filePath) {
         this.filePath = filePath;
     }
-    @Override
     public void run() {
         try {
             ServerSocket serverSocket = new ServerSocket(9990);
@@ -39,9 +38,7 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
             while((r = bis.read())!=-1){
                 bos.write(r);                          
             }
-           
             System.out.println("====================> File Send Complete");
-           
             bos.close();
             bis.close();
             out.close();
@@ -56,10 +53,7 @@ class FileSender extends Thread{ //ÆÄÀÏ¼­¹ö ¿ªÇÒ outputstreamÀ¸·Î ÆÄÀÏÀ» Å¬¶óÀÌ¾
     }
 }
  
- 
 class FileReceiver extends Thread{
-//ÆÄÀÏÅ¬¶óÀÌ¾ðÆ® ¿ªÇÒ
-   
     Socket socket;
     InputStream in;
     FileOutputStream fos;
@@ -68,24 +62,20 @@ class FileReceiver extends Thread{
     BufferedOutputStream bos;
     public FileReceiver() {
        
-    }
-   
+    } 
     public FileReceiver(String ip,String filename) {
         try {
             this.filename = filename;
             socket = new Socket(ip,9990);
             System.out.println("====================> Start File Download");
             in = socket.getInputStream();
-            bis = new BufferedInputStream(in);
-           
+            bis = new BufferedInputStream(in);           
         } catch (UnknownHostException e) {         
             e.printStackTrace();
         } catch (IOException e) {              
             e.printStackTrace();
         }
     }
-   
-    @Override
     public void run() {
         try {
             String fileSeparator = System.getProperty("file.separator");
@@ -102,10 +92,8 @@ class FileReceiver extends Thread{
             System.out.println("====================> Down"+fileSeparator+filename);
             System.out.println("====================> File Download Complete");
         } catch (FileNotFoundException e) {        
-            System.out.println("¿¹¿Ü: "+e.getMessage());
-            //e.printStackTrace();
-        } catch (IOException e) {          
-            //e.printStackTrace();
+            System.out.println("Exception: "+e.getMessage());
+        } catch (IOException e) { 
             System.out.println("====================> File Send Failed");
         }finally{
             try {
