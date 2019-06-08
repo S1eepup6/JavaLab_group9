@@ -5,16 +5,16 @@
     MESSAGE, TEXT, PHOTO, VIDEO
     
 
-## 1. File / Message transfer
+## 1. File / Message Transfer
     JunSeok Lee will modify.
     Yes of Course....
 
 
-## 2. User descript
+## 2. User Description
     I believe JunSeok Lee
     No, you evil.
 
-## 3. Self-recommendation system
+## 3. Self-Recommendation System
     Based on WordNet-Domain's WN Affect dataset.
     http://wndomains.fbk.eu/index.html
     Dataset is preprocessed before implementation.
