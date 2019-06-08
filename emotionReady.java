@@ -12,11 +12,12 @@ import java.util.ArrayList;
 
 class emotionReady
 {
+    String chatRoom;
     File emotionFile = null;
     HashMap<String, Double> emotion = new HashMap<String, Double>();
     Stack<Double> sentimentStack = new Stack<Double>();
 
-    public emotionReady()
+    public emotionReady(String chatRoomName)
     {
         //before analyze, save emotion.txt data
         emotionFile = new File("emotion.txt");
@@ -54,8 +55,8 @@ class emotionReady
             fe.printStackTrace();
         }
 
-
-        File sentimentFile = new File("sentiment.txt");
+        chatRoom = chatRoomName;
+        File sentimentFile = new File(chatRoom + "_sentiment.txt");
         try
         {
             BufferedReader sentimentFileReader = new BufferedReader(new FileReader(sentimentFile));
@@ -113,7 +114,7 @@ class emotionReady
                 if(!(i < -1.0 || i > 1.0))
                     sentiment += i;
             }
-            FileWriter sentimentFileWriter = new FileWriter(new File("sentiment.txt"), true);
+            FileWriter sentimentFileWriter = new FileWriter(new File(chatRoom + "_sentiment.txt"), true);
             sentimentFileWriter.write(sentiment + "\r\n");
             sentimentFileWriter.close();
 
