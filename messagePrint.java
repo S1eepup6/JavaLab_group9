@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 
-class messagePrint{
+public class messagePrint{
     String ID = null;
     File header = null;
     String msg = null;
@@ -18,10 +18,8 @@ class messagePrint{
     emotionReady tempER = null;
     Stack<Double> sentimentStack = new Stack<Double>();
 
-    public messagePrint(String filename, String message, String owner, emotionReady mainER)
+    public messagePrint(String owner, emotionReady mainER)
     {
-        header = new File(filename);
-        msg = message;
         ID = owner;
         tempER = mainER;
 
@@ -90,9 +88,10 @@ class messagePrint{
         }
     }
 
-    public void getNewMessage(String newMessage)
+    public void getNewMessage(String headerFile, String newMessage)
     {
-        msg =newMessage;
+        header = new File(headerFile);
+        msg = newMessage;
     }
 
     public void printMessage()

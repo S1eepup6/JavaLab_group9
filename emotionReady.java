@@ -51,7 +51,7 @@ class emotionReady
         }
     }
 
-    public List analyze(String rawMessage)
+    public List<Double> analyze(String rawMessage)
     {
         ArrayList<Double> sentenceEmo = new ArrayList<Double>();
         String words[] = rawMessage.trim().split("\\s+");
