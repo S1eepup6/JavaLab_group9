@@ -12,14 +12,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
  
 public class FileTrans {
-    /*public static void main(String[] args) {     
-        System.out.println("쓰레드실행.");
-    }*/
+	
 }
- 
+
 class FileSender extends Thread{ //파일서버 역할 outputstream으로 파일을 클라이언트에게 전송.
     String filePath;
-    private final int SERVER_PORT = 5000;
     public FileSender() {
        
     }
@@ -32,15 +29,12 @@ class FileSender extends Thread{ //파일서버 역할 outputstream으로 파일을 클라이�
             ServerSocket serverSocket = new ServerSocket(9990);
             System.out.println("====================> 파일서버 세팅완료");
             serverSocket.setSoTimeout(5000);
-           
             Socket socket = serverSocket.accept();
             System.out.println("====================> 파일전송 시작");
             FileInputStream fis = new FileInputStream(filePath);
             BufferedInputStream bis = new BufferedInputStream(fis);
-           
             OutputStream out = socket.getOutputStream();
             BufferedOutputStream bos = new BufferedOutputStream(out);
-             
             int r=0;
             while((r = bis.read())!=-1){
                 bos.write(r);                          
@@ -98,7 +92,6 @@ class FileReceiver extends Thread{
             File f = new File("Down");         
             if(!f.isDirectory()){
                 f.mkdir();
-                //System.out.println("mkdir()");
             }
             fos = new FileOutputStream("Down"+fileSeparator+filename);
             bos = new BufferedOutputStream(fos);
@@ -125,6 +118,5 @@ class FileReceiver extends Thread{
                 e.printStackTrace();
             }          
         }
-       
     }
 }
