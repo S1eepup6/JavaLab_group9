@@ -40,7 +40,7 @@ class Receiver extends Thread{
             System.out.println("Exception:"+e);
         }
    }  
-   public String[] getMsgParse(String msg){
+   public String[] MsgParse(String msg){
         String[] tmpArr = msg.split("[|]");
         return tmpArr;
     }
@@ -48,7 +48,7 @@ class Receiver extends Thread{
         while(in!=null){
             try{
                 String msg = in.readUTF();
-                String[] msgArr = getMsgParse(msg.substring(msg.indexOf("|")+1));               
+                String[] msgArr = MsgParse(msg.substring(msg.indexOf("|")+1));               
                 if(msg.startsWith("logon#yes")){
                     MultiClient.chatState = 1;
                     System.out.println(msgArr[0]);
@@ -59,7 +59,7 @@ class Receiver extends Thread{
                 }else if(msg.startsWith("enterRoom#yes")){
                     System.out.println("[##] You entered ("+msgArr[0]+").");
                     messageSave loader = new messageSave(msgArr[0]);
-                    loader.load();
+                    // loader.load();`
                     MultiClient.chatState = 2;
                 }else if(msg.startsWith("enterRoom#no")){
                     //enterRoom#no|Áö¿ª
@@ -68,7 +68,7 @@ class Receiver extends Thread{
                 }else if(msg.startsWith("show")){
                     System.out.println(msgArr[0]);
                 }else if(msg.startsWith("say")){
-                    System.out.println("["+msgArr[0]+"] "+msgArr[1] ); 
+                    System.out.println("["+msgArr[0]+"] "+msgArr[1] );
                 }else if(msg.startsWith("whisper")){
                     System.out.println("[whisper]["+msgArr[0]+"] "+msgArr[1] );
                 }else if(msg.startsWith("req_PvPchat")){ 
@@ -106,7 +106,7 @@ class Receiver extends Thread{
                  System.out.println("Exception:"+e);
                  System.out.println("##Disconnected with server.");
                 return;
-            } catch(Exception e){              
+            }catch(Exception e){              
                 System.out.println("Receiver:run() Exception:"+e);
             }
         }
@@ -139,7 +139,6 @@ class Sender extends Thread {
                      if(!msg.trim().equals("")){                 
                          name=msg;
                          out.writeUTF("LOGON|"+msg);
-                       
                      }else{
                          System.out.println("[##] You cannot input blank name.\r\n" +
                                 "¢ºPlease input name again:");
@@ -181,9 +180,9 @@ class Sender extends Thread {
                     }
                     MultiClient.chatState=2;
                 }else{
-                    out.writeUTF("SAY|"+name+"|"+msg);                 
+                    out.writeUTF("SAY|"+name+"|"+msg);
                 }
-            }catch(SocketException e){             
+            }catch(SocketException e){
                  System.out.println("Sender:run()Exception:"+e);
                  System.out.println("##Disconnected with server.");
                 return;              

@@ -14,14 +14,17 @@ class emotionReady
 {
     String chatRoom;
     File emotionFile = null;
+    String chatRoomName;
     HashMap<String, Double> emotion = new HashMap<String, Double>();
     Stack<Double> sentimentStack = new Stack<Double>();
-
-    public emotionReady(String chatRoomName)
+    public emotionReady()
     {
-        //before analyze, save emotion.txt data
+    	chatRoomName = null;
         emotionFile = new File("emotion.txt");
-
+    }
+    public void init(String chatRoomName)
+    {
+    	this.chatRoomName = chatRoomName;
         try
         {
             BufferedReader emotionFileReader = new BufferedReader(new FileReader(emotionFile));
@@ -34,9 +37,7 @@ class emotionReady
                         break;
                     if(line.charAt(0) == '#')
                         continue;
-
                     String vals[] = line.split("\\s+");
-
                     emotion.put(vals[0], Double.parseDouble(vals[1]));
                 }
                 catch(IOException e)
@@ -54,7 +55,6 @@ class emotionReady
         {
             fe.printStackTrace();
         }
-
         chatRoom = chatRoomName;
         File sentimentFile = new File(chatRoom + "_sentiment.txt");
         try
@@ -78,14 +78,11 @@ class emotionReady
         {
             e.printStackTrace();
         }
-
     }
-
     public double analyze(String rawMessage)
     {
         ArrayList<Double> sentenceEmo = new ArrayList<Double>();
         double recommendedBase = 0.0;
-
         try
         {
             double weight = 0.70;
@@ -117,14 +114,11 @@ class emotionReady
             FileWriter sentimentFileWriter = new FileWriter(new File(chatRoom + "_sentiment.txt"), true);
             sentimentFileWriter.write(sentiment + "\r\n");
             sentimentFileWriter.close();
-
             sentimentStack.push(sentiment);
-
             //calculate emotion value for sentence and push it to stack and file
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return recommendedBase;
     }
 }

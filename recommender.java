@@ -6,17 +6,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 class recommender {
     public ArrayList<String> negativeSentence = new ArrayList<String>();
     public ArrayList<String> positiveSentence = new ArrayList<String>();
     public ArrayList<String> neutralSentence = new ArrayList<String>();
-
+    Scanner s = new Scanner(System.in);
+    
     public recommender() {
         File negative = new File("Negative.txt");
         File neutral = new File("Neutral.txt");
         File positive = new File("Positive.txt");
-
         try
         {
             BufferedReader negReader = new BufferedReader(new FileReader(negative));
@@ -68,19 +69,19 @@ class recommender {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
     }
-
-    public void recommend(double base)
+    public String recommend(double base)
     {
         Random random = new Random();
-
+        String result = "say|Recommended Reply|\n";
+        
         if(base < -0.25)        //negative
         {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(negativeSentence.size());
-                System.out.println(i + ": " + negativeSentence.get(temp));
+                result.concat(negativeSentence.get(temp));
+                result.concat("\n");
             }
         }
         else if(base > 0.25)    //positive
@@ -88,7 +89,8 @@ class recommender {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(positiveSentence.size());
-                System.out.println(i + ": " + positiveSentence.get(temp));
+                result.concat(positiveSentence.get(temp));
+                result.concat("\n");            
             }
         }
         else                    //neutral
@@ -96,11 +98,10 @@ class recommender {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(neutralSentence.size());
-                System.out.println(i + ": " + neutralSentence.get(temp));
+                result.concat(neutralSentence.get(temp));
+                result.concat("\n");           
             }
         }
-
-        System.out.println("5: Next recommendation");
-        System.out.println("6: Send your own message");
+        return result;
     }
 }

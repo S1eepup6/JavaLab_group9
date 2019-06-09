@@ -13,6 +13,7 @@ public class MultiServer {
     ServerSocket serverSocket = null;
     Socket socket = null;
     static int connUserCount = 0;
+    emotionReady emotion = new emotionReady();
     public MultiServer(){
         globalMap = new HashMap<String,HashMap<String, ServerRecThread>>();
         Collections.synchronizedMap(globalMap);
@@ -76,14 +77,26 @@ public class MultiServer {
             }
         }
     }
-    public void sendGroupMsg(String loc, String msg){      
+    public String[] MsgParse(String msg){
+        String[] tmpArr = msg.split("[|]");
+        return tmpArr;
+    }
+    public void sendGroupMsg(String loc, String msg){
+    	emotion.init(loc);
+    	double analyze;
+    	recommender recom = new recommender();
+    	// String[] msgArr = MsgParse(msg.substring(msg.indexOf("|")+1));
+    	analyze = emotion.analyze(msg);
+    	String recommsg = recom.recommend(analyze);
+    	System.out.println("Recommend : " + recommsg);
         HashMap<String, ServerRecThread> gMap = globalMap.get(loc);    
         Iterator<String> group_it = globalMap.get(loc).keySet().iterator();        
         while(group_it.hasNext()){
             try{    
                     ServerRecThread st = gMap.get(group_it.next());
                     if(!st.chatMode){
-                        st.out.writeUTF(msg);  
+                        st.out.writeUTF(msg);
+                        st.out.writeUTF(recommsg);
                     }
             }catch(Exception e){
                 System.out.println("Exception:"+e);
@@ -174,7 +187,7 @@ public boolean isNameGlobal(String name){
         String filePath;
         boolean chatMode;
        
-       public ServerRecThread(Socket socket){
+        public ServerRecThread(Socket socket){
             this.socket = socket;
             try{
                 in = new DataInputStream(socket.getInputStream());
@@ -206,7 +219,6 @@ public boolean isNameGlobal(String name){
             String[] tmpArr = msg.split("[|]");        
             return tmpArr;
         }
-        @Override
         public void run(){
             HashMap<String, ServerRecThread> clientMap=null;
             try{  
@@ -231,7 +243,7 @@ public boolean isNameGlobal(String name){
                              clientMap.put(name, this);
                              System.out.println(getEachMapSize());                    
                              out.writeUTF("enterRoom#yes|"+loc);
-                         }else{                        
+                         }else{
                              out.writeUTF("enterRoom#no|"+loc);                              
                          }
                          
@@ -351,11 +363,9 @@ public boolean isNameGlobal(String name){
                         }
                     }else if(msg.startsWith("SAY")){
                           if(!chatMode){
-                            sendGroupMsg(loc, "say|"+name+"|"+msgArr[1]);
-                            messageSave Saver = new messageSave(loc);
-                            emotionReady emotion = new emotionReady(loc);
-                            emotion.analyze(msgArr[1]);
-                            Saver.save(name, msgArr[1]);
+                        	  messageSave saver = new messageSave(loc);
+                        	  saver.save(name, msgArr[1]);
+                              sendGroupMsg(loc, "say|"+name+"|"+msgArr[1]);
                           }else{
                             sendPvPMsg(loc, name,toNameTmp , "say|"+name+"|"+msgArr[1]);
                           }
@@ -417,7 +427,7 @@ public boolean isNameGlobal(String name){
                 if(clientMap!=null){
                     clientMap.remove(name);
                     sendGroupMsg(loc,"## "+ name + "exit the server.");
-                    System.out.println("##Now "+(--MultiServer.connUserCount)+"people are(is) online.");
+                    System.out.println("##Now "+(--MultiServer.connUserCount)+" people are(is) online.");
                 }              
             }
         }
