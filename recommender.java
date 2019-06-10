@@ -80,8 +80,7 @@ class recommender {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(negativeSentence.size());
-                result.concat(negativeSentence.get(temp));
-                result.concat("\n");
+                result += negativeSentence.get(temp) + "\n";
             }
         }
         else if(base > 0.25)    //positive
@@ -89,8 +88,7 @@ class recommender {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(positiveSentence.size());
-                result.concat(positiveSentence.get(temp));
-                result.concat("\n");            
+                result += positiveSentence.get(temp) + "\n";
             }
         }
         else                    //neutral
@@ -98,8 +96,7 @@ class recommender {
             for(int i = 1 ; i <= 4; i++)
             {
                 int temp = random.nextInt(neutralSentence.size());
-                result.concat(neutralSentence.get(temp));
-                result.concat("\n");           
+                result += neutralSentence.get(temp) + "\n";
             }
         }
         return result;

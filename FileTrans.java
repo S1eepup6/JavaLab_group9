@@ -79,17 +79,17 @@ class FileReceiver extends Thread{
     public void run() {
         try {
             String fileSeparator = System.getProperty("file.separator");
-            File f = new File("Down");         
+            File f = new File("Download");         
             if(!f.isDirectory()){
                 f.mkdir();
             }
-            fos = new FileOutputStream("Down"+fileSeparator+filename);
+            fos = new FileOutputStream("Download"+fileSeparator+filename);
             bos = new BufferedOutputStream(fos);
             int r=0;
             while((r= bis.read())!=-1){
                 bos.write(r);
             }
-            System.out.println("====================> Down"+fileSeparator+filename);
+            System.out.println("====================> Download"+fileSeparator+filename);
             System.out.println("====================> File Download Complete");
         } catch (FileNotFoundException e) {        
             System.out.println("Exception: "+e.getMessage());
@@ -103,7 +103,6 @@ class FileReceiver extends Thread{
                 bos.close();
                 socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
             }          
         }
     }
